@@ -3,3 +3,9 @@ reviews.config.json
 assets/reviews.json
 .gstack/
 .claude-flow/
+.DS_Store
+src/*.mp4
+src/portrait/*.mp4
+assets/scene*-still.jpg
+assets/frames/
+assets/frames-m/

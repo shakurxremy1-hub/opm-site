@@ -6,10 +6,10 @@
 <title>OPM Ventures — AI That Works While You Serve</title>
 <meta name="description" content="Autonomous AI systems for operators who can't afford to stop. Built by Shakur Remy, active duty military, AI founder.">
 
-<!-- Fonts: Geist -->
+<!-- Fonts: Geist (dashboard/status texture) + Fraunces (cinematic headline moments) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 
 <!-- GSAP 3.13 -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/gsap.min.js"></script>
@@ -27,7 +27,7 @@
 html { scroll-behavior: auto; }
 body {
   font-family: 'Geist', system-ui, sans-serif;
-  background: #050508;
+  background: #0a0a0c;
   color: #ffffff;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -36,21 +36,24 @@ a { color: inherit; text-decoration: none; }
 img, video { display: block; max-width: 100%; }
 
 /* ══════════════════════════════════════════════════
-   DESIGN TOKENS
+   DESIGN TOKENS — warm cinematic (ember/teal), independent
+   from the sibling site's champagne/brass palette
 ══════════════════════════════════════════════════ */
 :root {
-  --bg:        #050508;
-  --surface:   #0c0c12;
-  --surface-2: #101018;
-  --border:    rgba(255,255,255,0.06);
-  --border-hi: rgba(255,255,255,0.11);
+  --bg:        #0a0a0c;
+  --surface:   #131316;
+  --surface-2: #18181c;
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(255,255,255,0.13);
 
-  --indigo:    #6366f1;
-  --indigo-lt: #818cf8;
-  --cyan:      #06b6d4;
-  --violet:    #a78bfa;
-  --amber:     #f59e0b;
+  --indigo:    #d17a42;   /* "ember" — kept var name for a minimal diff, warm now */
+  --indigo-lt: #e69a66;   /* "ember-lt" */
+  --cyan:      #3f8f8a;   /* "teal" — secondary/data accent */
+  --violet:    #3f8f8a;
+  --amber:     #f2a950;
   --green:     #10b981;
+
+  --font-display: 'Fraunces', Georgia, serif;
 
   --text-1:    #ffffff;
   --text-2:    rgba(255,255,255,0.65);
@@ -72,11 +75,11 @@ img, video { display: block; max-width: 100%; }
 }
 #cursor-ring {
   width: 28px; height: 28px;
-  border: 1px solid rgba(99,102,241,0.4);
+  border: 1px solid rgba(209,122,66,0.4);
   border-radius: 50%;
   transition: width .18s, height .18s, border-color .18s;
 }
-body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,102,241,0.8); }
+body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(209,122,66,0.8); }
 
 /* ══════════════════════════════════════════════════
    FLOATING GLASS NAV
@@ -155,7 +158,30 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
 /* ══════════════════════════════════════════════════
    SECTION SHARED
 ══════════════════════════════════════════════════ */
-.s-wrap { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+.s-wrap { max-width: 1200px; margin: 0 auto; padding: 0 48px; position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════════════
+   SECTION-BG — full-bleed image layer for #explainer/#systems/#vision.
+   Absolutely positioned so it can't affect document flow height (existing
+   ScrollTrigger pin/scrub math for these sections stays valid). Sits behind
+   .s-wrap (z-index:1 above, via the rule above) inside a section that's
+   already position:relative + overflow:hidden.
+══════════════════════════════════════════════════ */
+.section-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--bg-img, none);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+}
+.section-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 55%, transparent) 30%, color-mix(in srgb, var(--bg) 55%, transparent) 70%, var(--bg) 100%);
+}
 
 .eyebrow {
   display: inline-flex;
@@ -167,8 +193,8 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
   font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  border: 1px solid rgba(99,102,241,0.25);
-  background: rgba(99,102,241,0.07);
+  border: 1px solid rgba(209,122,66,0.25);
+  background: rgba(209,122,66,0.07);
   color: var(--indigo-lt);
   margin-bottom: 28px;
 }
@@ -180,122 +206,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
 }
 @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 
-/* ══════════════════════════════════════════════════
-   HERO  (scroll-scrubbed Kling video + blobs)
-══════════════════════════════════════════════════ */
-#hero-driver {
-  position: relative;
-  min-height: 280svh;
-}
-#hero {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Morphing blobs */
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  will-change: transform, border-radius;
-  pointer-events: none;
-}
-.blob-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%);
-  top: -100px; left: -100px;
-}
-.blob-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(6,182,212,0.16) 0%, transparent 70%);
-  bottom: -80px; right: -80px;
-}
-.blob-3 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%);
-  top: 40%; left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-/* Scroll-scrubbed video / canvas layer */
-#hero-video-wrap {
-  position: absolute;
-  inset: 0;
-  opacity: 1;
-}
-#hero-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  opacity: 0.35;
-}
-#hero-video {
-  position: absolute;
-  inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0.18;
-}
-.hero-video-overlay {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, #050508 90%),
-    linear-gradient(to bottom, #050508 0%, transparent 15%, transparent 85%, #050508 100%);
-}
-
-/* Grid lines — subtle tech feel */
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
-  background-size: 80px 80px;
-  pointer-events: none;
-}
-
-/* Hero content */
-.hero-content {
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  padding: 0 32px;
-  max-width: 1000px;
-}
-#hero-eyebrow { margin-bottom: 32px; }
-.hero-hed {
-  font-size: clamp(3rem, 7vw, 7rem);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.95;
-  color: var(--text-1);
-  margin-bottom: 28px;
-}
-.hero-hed .accent { color: transparent; background: linear-gradient(135deg, var(--indigo-lt), var(--cyan)); -webkit-background-clip: text; background-clip: text; }
-.hero-sub {
-  font-size: clamp(1rem, 1.6vw, 1.2rem);
-  font-weight: 400;
-  color: var(--text-2);
-  line-height: 1.7;
-  max-width: 560px;
-  margin: 0 auto 44px;
-  letter-spacing: -0.01em;
-}
-.hero-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* Button-in-Button (primary) */
+/* Button-in-Button (primary) — reused across hero/connect/reviews */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -339,63 +250,6 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
 }
 .btn-ghost:hover { border-color: rgba(255,255,255,0.22); color: var(--text-1); }
 
-/* Scroll indicator */
-#hero-scroll {
-  position: absolute;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-#hero-scroll span {
-  font-size: 0.55rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--text-4);
-}
-.scroll-line {
-  width: 1px; height: 40px;
-  background: linear-gradient(to bottom, rgba(99,102,241,0.6), transparent);
-  animation: scrollPulse 2.2s ease-in-out infinite;
-}
-@keyframes scrollPulse {
-  0%,100%{opacity:0.3;transform:scaleY(0.5);transform-origin:top}
-  50%{opacity:1;transform:scaleY(1)}
-}
-
-/* Status bar above hero headline */
-.hero-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 24px;
-  padding: 10px 20px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  margin-bottom: 40px;
-  font-size: 0.72rem;
-  color: var(--text-3);
-  letter-spacing: -0.01em;
-}
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.live-dot {
-  width: 5px; height: 5px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
-  animation: blink 2.2s ease-in-out infinite;
-}
-.live-dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
-.status-sep { width: 1px; height: 14px; background: var(--border-hi); }
-
 /* ══════════════════════════════════════════════════
    EXPLAINER — pinned scroll, 4 concepts
 ══════════════════════════════════════════════════ */
@@ -427,6 +281,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
   margin-bottom: 20px;
 }
 .exp-hed {
+  font-family: var(--font-display);
   font-size: clamp(2.4rem, 4vw, 3.8rem);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -528,11 +383,14 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
   transition: border-color .3s;
   cursor: none;
 }
-.sys-card:hover { border-color: rgba(99,102,241,0.3); }
+.sys-card:hover { border-color: rgba(209,122,66,0.3); }
 .sys-card-inner {
   padding: 28px 28px 26px;
   border-radius: calc(20px - 2px);
-  background: var(--surface);
+  /* was a solid var(--surface) — translucent + blurred so #systems-bg reads through */
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
   height: 100%;
   display: flex;
@@ -546,7 +404,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(209,122,66,0.4), transparent);
   opacity: 0;
   transition: opacity .3s;
 }
@@ -608,6 +466,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
 
 /* Section headline */
 .section-hed {
+  font-family: var(--font-display);
   font-size: clamp(2.2rem, 4vw, 3.4rem);
   font-weight: 800;
   letter-spacing: -0.04em;
@@ -643,6 +502,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
   margin-top: 72px;
 }
 .vision-quote {
+  font-family: var(--font-display);
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -745,21 +605,22 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,10
 }
 .orb-1 {
   width: 400px; height: 400px;
-  background: rgba(99,102,241,0.12);
+  background: rgba(209,122,66,0.12);
   top: -100px; left: 50%;
   transform: translateX(-50%);
 }
 .orb-2 {
   width: 300px; height: 300px;
-  background: rgba(6,182,212,0.08);
+  background: rgba(63,143,138,0.08);
   bottom: -80px; right: 100px;
 }
 .orb-3 {
   width: 250px; height: 250px;
-  background: rgba(167,139,250,0.1);
+  background: rgba(63,143,138,0.1);
   bottom: -60px; left: 80px;
 }
 .connect-hed {
+  font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 5.5rem);
   font-weight: 800;
   letter-spacing: -0.05em;
@@ -876,7 +737,6 @@ footer {
    GTA VI PARALLAX SYSTEM
 ══════════════════════════════════════════════════ */
 /* GPU-accelerated parallax layers */
-#hero-canvas, .blob, .hero-grid { will-change: transform; }
 
 /* Section atmospheric backgrounds — large, blurred, parallax slower than content */
 .section-atmo {
@@ -889,18 +749,18 @@ footer {
 }
 #sys-atmo {
   width: 1100px; height: 900px;
-  background: radial-gradient(ellipse, rgba(99,102,241,0.13) 0%, transparent 68%);
+  background: radial-gradient(ellipse, rgba(209,122,66,0.13) 0%, transparent 68%);
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
 }
 #vis-atmo {
   width: 800px; height: 800px;
-  background: radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 68%);
+  background: radial-gradient(circle, rgba(63,143,138,0.09) 0%, transparent 68%);
   top: 10%; right: -200px;
 }
 #conn-atmo {
   width: 900px; height: 700px;
-  background: radial-gradient(ellipse, rgba(167,139,250,0.11) 0%, transparent 68%);
+  background: radial-gradient(ellipse, rgba(63,143,138,0.11) 0%, transparent 68%);
   top: 20%; left: 50%;
   transform: translate(-50%, -50%);
 }
@@ -914,7 +774,7 @@ footer {
 #reviews { padding: 160px 0; position: relative; overflow: hidden; }
 #rev-atmo {
   width: 900px; height: 800px;
-  background: radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 68%);
+  background: radial-gradient(ellipse, rgba(242,169,80,0.08) 0%, transparent 68%);
   top: 8%; left: -220px;
 }
 .rev-summary {
@@ -965,7 +825,7 @@ footer {
   transition: border-color .3s;
   cursor: none;
 }
-.rev-card:hover { border-color: rgba(245,158,11,0.28); }
+.rev-card:hover { border-color: rgba(242,169,80,0.28); }
 .rev-card-inner {
   padding: 26px 26px 24px;
   border-radius: calc(20px - 2px);
@@ -1013,16 +873,16 @@ footer {
 ══════════════════════════════════════════════════ */
 
 /* — text selection + scrollbar — */
-::selection { background: rgba(99,102,241,0.32); color: #fff; }
-html { scrollbar-width: thin; scrollbar-color: rgba(129,140,248,0.35) transparent; }
+::selection { background: rgba(209,122,66,0.32); color: #fff; }
+html { scrollbar-width: thin; scrollbar-color: rgba(230,154,102,0.35) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(129,140,248,0.4), rgba(99,102,241,0.25));
+  background: linear-gradient(180deg, rgba(230,154,102,0.4), rgba(209,122,66,0.25));
   border: 2px solid var(--bg);
   border-radius: 100px;
 }
-::-webkit-scrollbar-thumb:hover { background: rgba(129,140,248,0.6); }
+::-webkit-scrollbar-thumb:hover { background: rgba(230,154,102,0.6); }
 
 /* — keyboard focus rings (mouse users unaffected) — */
 :focus-visible {
@@ -1049,13 +909,13 @@ body::after {
   transition: background .35s, box-shadow .4s cubic-bezier(.32,.72,0,1);
 }
 .sys-card:hover, .rev-card:hover {
-  background: linear-gradient(180deg, rgba(129,140,248,0.55), rgba(6,182,212,0.16));
+  background: linear-gradient(180deg, rgba(230,154,102,0.55), rgba(63,143,138,0.16));
   box-shadow:
     0 24px 55px -22px rgba(0,0,0,0.75),
-    0 0 34px -14px rgba(99,102,241,0.35);
+    0 0 34px -14px rgba(209,122,66,0.35);
 }
 .vstat:hover {
-  background: linear-gradient(180deg, rgba(129,140,248,0.4), rgba(255,255,255,0.05));
+  background: linear-gradient(180deg, rgba(230,154,102,0.4), rgba(255,255,255,0.05));
   box-shadow: 0 20px 45px -22px rgba(0,0,0,0.7);
 }
 
@@ -1071,7 +931,7 @@ body::after {
   transition: opacity .35s;
   background: radial-gradient(
     260px circle at var(--mx, 50%) var(--my, 0%),
-    rgba(129,140,248,0.16), transparent 60%);
+    rgba(230,154,102,0.16), transparent 60%);
 }
 .sys-card:hover .sys-card-inner::after,
 .rev-card:hover .rev-card-inner::after { opacity: 1; }
@@ -1084,14 +944,14 @@ body::after {
 
 /* — buttons: gradient fill, spring hover — */
 .btn-primary, .nav-btn {
-  background: linear-gradient(135deg, var(--indigo-lt) 0%, var(--indigo) 55%, #4f46e5 100%);
-  box-shadow: 0 10px 24px -10px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
+  background: linear-gradient(135deg, var(--indigo-lt) 0%, var(--indigo) 55%, #b85f2e 100%);
+  box-shadow: 0 10px 24px -10px rgba(209,122,66,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
   transition: transform .3s cubic-bezier(.32,.72,0,1), box-shadow .3s, opacity .2s;
 }
 .btn-primary:hover, .nav-btn:hover {
   opacity: 1;
   transform: translateY(-2px);
-  box-shadow: 0 18px 34px -10px rgba(99,102,241,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+  box-shadow: 0 18px 34px -10px rgba(209,122,66,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
 }
 .btn-primary:active, .nav-btn:active { transform: translateY(0); }
 .btn-ghost {
@@ -1100,7 +960,7 @@ body::after {
 .btn-ghost:hover {
   border-color: var(--indigo-lt);
   color: var(--text-1);
-  background: rgba(99,102,241,0.09);
+  background: rgba(209,122,66,0.09);
   transform: translateY(-2px);
 }
 
@@ -1108,14 +968,14 @@ body::after {
 #nav { transition: background .3s, border-color .3s, box-shadow .3s; }
 #nav.scrolled {
   background: rgba(5,5,8,0.9);
-  border-color: rgba(99,102,241,0.24);
+  border-color: rgba(209,122,66,0.24);
   box-shadow:
     0 10px 34px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(99,102,241,0.08),
+    0 0 0 1px rgba(209,122,66,0.08),
     inset 0 1px 0 rgba(255,255,255,0.09);
 }
 .nav-links a { position: relative; }
-.nav-links a:hover { color: var(--text-1); background: rgba(99,102,241,0.12); }
+.nav-links a:hover { color: var(--text-1); background: rgba(209,122,66,0.12); }
 
 @media (prefers-reduced-motion: reduce) {
   .sys-card, .rev-card, .vstat, .btn-primary, .nav-btn, .btn-ghost { transition: none; }
@@ -1141,9 +1001,6 @@ body::after {
 }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
-  #hero-driver { min-height: auto; }
-  #hero { position: static; height: auto; padding: 120px 0; }
-  #hero-video-wrap { display: none; }
   #explainer-driver { height: auto; }
   #explainer { position: static; height: auto; padding: 80px 0; }
   .concept-card { position: static; opacity: 1; }
@@ -1175,84 +1032,12 @@ body::after {
 </div>
 
 <!-- ════════════════════════════════════════
-     HERO — Scroll-scrubbed Kling video
+     HERO — scroll-scrubbed canvas frame-sequence flight
+     (mountScrollWorld builds its own DOM into #world — see config near
+     the bottom of the SCRIPTS block. Ported from cinematic-scroll-template
+     / shakur-remy-site's proven engine.)
 ════════════════════════════════════════ -->
-<div id="hero-driver">
-  <section id="hero">
-
-    <!-- Morphing blobs -->
-    <div class="blob blob-1" id="blob1"></div>
-    <div class="blob blob-2" id="blob2"></div>
-    <div class="blob blob-3" id="blob3"></div>
-
-    <!-- Cinematic canvas background (replace src with assets/hero-loop.mp4 after running generate-assets.mjs) -->
-    <div id="hero-video-wrap">
-      <canvas id="hero-canvas"></canvas>
-      <video
-        id="hero-video"
-        src="assets/hero-loop.mp4"
-        muted playsinline preload="auto"
-        style="display:none"
-      ></video>
-      <div class="hero-video-overlay"></div>
-    </div>
-
-    <!-- Grid lines -->
-    <div class="hero-grid"></div>
-
-    <!-- Content -->
-    <div class="hero-content">
-
-      <!-- Live status bar -->
-      <div class="hero-status" id="hero-status">
-        <div class="status-item">
-          <div class="live-dot"></div>
-          <span>Recon Agent — Active</span>
-        </div>
-        <div class="status-sep"></div>
-        <div class="status-item">
-          <div class="live-dot"></div>
-          <span>Comms Agent — Active</span>
-        </div>
-        <div class="status-sep"></div>
-        <div class="status-item">
-          <div class="live-dot amber"></div>
-          <span>Command — On Duty</span>
-        </div>
-      </div>
-
-      <div class="eyebrow" id="hero-eyebrow">
-        <span class="eyebrow-dot"></span>
-        OPM Ventures LLC
-      </div>
-
-      <h1 class="hero-hed" id="hero-hed">
-        AI That Works<br>
-        <span class="accent">While You Serve</span>
-      </h1>
-
-      <p class="hero-sub" id="hero-sub">
-        Autonomous agents that generate leads, draft outreach, and dispatch tasks
-        around the clock — built by an operator who can't afford to stop.
-      </p>
-
-      <div class="hero-actions" id="hero-actions">
-        <a href="#systems" class="btn-primary">
-          See the System
-          <span class="btn-icon">→</span>
-        </a>
-        <a href="#connect" class="btn-ghost">Get In Touch</a>
-      </div>
-
-    </div>
-
-    <div id="hero-scroll">
-      <span>scroll</span>
-      <div class="scroll-line"></div>
-    </div>
-
-  </section>
-</div>
+<div id="world"></div>
 
 <!-- ════════════════════════════════════════
      TICKER
@@ -1284,6 +1069,9 @@ body::after {
 ════════════════════════════════════════ -->
 <div id="explainer-driver">
   <section id="explainer">
+    <!-- TODO: point --bg-img at a still from assets/frames/ once generate-scenes.mjs
+         + build-frames.sh have produced real frames (currently blocked — see report) -->
+    <div class="section-bg" style="--bg-img:url('assets/frames/f0060.jpg')" aria-hidden="true"></div>
     <div class="s-wrap">
       <div class="explainer-inner">
 
@@ -1364,6 +1152,7 @@ body::after {
      SYSTEMS — 6 projects
 ════════════════════════════════════════ -->
 <section id="systems">
+  <div class="section-bg" style="--bg-img:url('assets/frames/f0100.jpg')" aria-hidden="true"></div>
   <div class="section-atmo" id="sys-atmo" aria-hidden="true"></div>
   <div class="s-wrap">
 
@@ -1471,6 +1260,7 @@ body::after {
      VISION
 ════════════════════════════════════════ -->
 <section id="vision">
+  <div class="section-bg" style="--bg-img:url('assets/frames/f0140.jpg')" aria-hidden="true"></div>
   <div class="section-atmo" id="vis-atmo" aria-hidden="true"></div>
   <div class="vision-glow"></div>
   <div class="s-wrap">
@@ -1488,7 +1278,7 @@ body::after {
           That's the whole point."
         </blockquote>
         <div class="vision-attr" id="vis-attr">
-          <div class="vision-avatar" style="background:linear-gradient(135deg,#6366f1,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;font-family:'Geist',sans-serif;">SXR</div>
+          <div class="vision-avatar" style="background:linear-gradient(135deg,#d17a42,#3f8f8a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;font-family:'Geist',sans-serif;">SXR</div>
           <div class="vision-attr-text">
             <strong>Shakur X. Remy</strong>
             <span>Founder, OPM Ventures LLC · Active Duty</span>
@@ -1645,6 +1435,538 @@ lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add(time => lenis.raf(time * 1000));
 gsap.ticker.lagSmoothing(0);
 
+/* ════════════════════════════════════════════════════════════════════════
+   SCROLL WORLD — ported verbatim from cinematic-scroll-template /
+   shakur-remy-site's proven engine (mountDesktopFlight / mountMobileStory /
+   mountScrollWorld, the frameCount-driven canvas path — NOT the legacy
+   sw-* video-segment fallback, which is dropped here since it's unreachable
+   once frameCount is set). "Don't touch" block — edit the config call
+   further down instead of this code.
+
+   Lenis coexistence note: Lenis (default, non-`wrapper` mode) smooths the
+   REAL window.scrollY and still dispatches native `scroll` events on every
+   frame it moves the page — it does not run a virtual/transformed scroll
+   container. That means this engine's own `window.addEventListener('scroll', ...)`
+   below observes the exact same scroll position Lenis/ScrollTrigger use, so
+   there is one source of truth already; no separate bridge/rewire needed.
+   The one real interaction risk is TWO layers of easing stacked (Lenis's
+   smoothing + this engine's own `chase` lerp) — verify in a real browser
+   that the flight doesn't feel laggy/rubbery under fast scroll, and lower
+   `chase` (near the bottom config) if it does.
+   ════════════════════════════════════════════════════════════════════════ */
+function mountMobileStory(container, config) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = config.sections || [];
+  if (!S.length) return;
+  const N = S.length;
+  injectMobileCSS();
+  container.classList.add('mv2-root');
+  try { document.documentElement.style.scrollSnapType = 'y proximity'; } catch (e) {}
+
+  const ids = S.map((s, i) => s.id || ('s' + (i + 1)));
+  const kinetic = t => '<span class="mv2-kt">' + String(t).split(' ')
+    .map(w => '<span class="mv2-kt__w"><span class="mv2-kt__i">' + msesc(w) + '</span></span>').join(' ') + '</span>';
+
+  const bar = mel('div', 'mv2-bar');
+  const brand = mel('a', 'mv2-brand'); brand.href = '#top';
+  if (config.brand && config.brand.logo) { const lg = mel('img', 'mv2-brand__logo'); lg.src = config.brand.logo; lg.alt = config.brand.name || ''; brand.appendChild(lg); }
+  const bn = mel('span', 'mv2-brand__name'); bn.textContent = (config.brand && config.brand.name) || ''; brand.appendChild(bn);
+  bar.appendChild(brand);
+  const menuBtn = mel('button', 'mv2-menu-btn'); menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.innerHTML = '<i></i><i></i><i></i>';
+  bar.appendChild(menuBtn);
+  const menu = mel('nav', 'mv2-menu');
+  const links = S.map((s, i) => ({ href: '#' + ids[i], label: s.label || ('0' + (i + 1)) }))
+    .concat([{ href: '#systems', label: 'Systems' }, { href: '#vision', label: 'Mission' }, { href: '#connect', label: 'Connect' }]);
+  menu.innerHTML = links.map(l => '<a href="' + l.href + '">' + msesc(l.label) + '</a>').join('');
+  const closeMenu = () => document.body.classList.remove('mv2-menu-open');
+  menuBtn.addEventListener('click', () => document.body.classList.toggle('mv2-menu-open'));
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  container.appendChild(bar); container.appendChild(menu);
+
+  const rail = mel('div', 'mv2-rail');
+  const dots = S.map(() => { const d = mel('i'); rail.appendChild(d); return d; });
+  container.appendChild(rail);
+
+  const panels = S.map((s, i) => {
+    const sec = mel('section', 'mv2-panel' + (i === 0 ? ' mv2-panel--hero' : '') + (i === N - 1 ? ' mv2-panel--last' : ''));
+    sec.id = ids[i];
+    sec.style.setProperty('--mv2-accent', s.accent || '#d17a42');
+    const bg = mel('div', 'mv2-panel__bg');
+    const img = mel('img', 'mv2-panel__img');
+    img.src = s.stillMobile && i === 0 ? s.stillMobile : (s.still || s.stillMobile || '');
+    img.alt = ''; img.decoding = 'async'; img.loading = i < 2 ? 'eager' : 'lazy';
+    bg.appendChild(img);
+    const scrim = mel('div', 'mv2-panel__scrim');
+    const copy = mel('div', 'mv2-panel__copy');
+    let html = '<div class="mv2-panel__num">' + String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0') + '</div>';
+    if (s.eyebrow) html += '<span class="mv2-eyebrow">' + msesc(s.eyebrow) + '</span>';
+    if (s.title) html += (i === 0 ? '<h1 class="mv2-panel__title">' : '<h2 class="mv2-panel__title">') + kinetic(s.title) + (i === 0 ? '</h1>' : '</h2>');
+    if (s.body) html += '<p class="mv2-panel__body">' + msesc(s.body) + '</p>';
+    if (s.tags && s.tags.length) html += '<ul class="mv2-chips">' + s.tags.map(t => '<li>' + msesc(t) + '</li>').join('') + '</ul>';
+    if (s.cta) html += '<div class="mv2-panel__cta">' +
+      (s.cta.primary ? '<a class="mv2-btn mv2-btn--primary" href="' + msesc(s.cta.primary.href || '#') + '">' + msesc(s.cta.primary.label) + '</a>' : '') +
+      (s.cta.secondary ? '<a class="mv2-btn mv2-btn--ghost" href="' + msesc(s.cta.secondary.href || '#') + '">' + msesc(s.cta.secondary.label) + '</a>' : '') + '</div>';
+    if (i === 0) html += '<a class="mv2-scrollcue" href="#' + ids[1] + '"><span>Scroll</span><i></i></a>';
+    copy.innerHTML = html;
+    sec.appendChild(bg); sec.appendChild(scrim); sec.appendChild(copy);
+    container.appendChild(sec);
+    return { sec, bg, img, video: null, clip: 'assets/vid/scene' + (i + 1) + '.mp4', vis: false };
+  });
+
+  let playing = null;
+  function enter(o, i) {
+    o.sec.classList.add('mv2-live', 'mv2-vis'); o.vis = true;
+    dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    if (reduce) return;
+    if (playing && playing !== o && playing.video) { try { playing.video.pause(); playing.video.currentTime = 0; } catch (e) {} }
+    playing = o;
+    if (!o.video) {
+      const v = mel('video', 'mv2-panel__video');
+      v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = 'auto';
+      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('preload', 'auto');
+      v.src = o.clip;
+      v.addEventListener('loadeddata', () => o.sec.classList.add('mv2-hasvid'));
+      o.bg.appendChild(v); o.video = v;
+    }
+    try { o.video.currentTime = 0; } catch (e) {}
+    const pr = o.video.play(); if (pr && pr.catch) pr.catch(() => {});
+  }
+  function leave(o) { o.vis = false; o.sec.classList.remove('mv2-vis'); if (o.video) { try { o.video.pause(); o.video.currentTime = 0; } catch (e) {} } }
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      const i = panels.findIndex(x => x.sec === e.target); if (i < 0) return;
+      if (e.isIntersecting && e.intersectionRatio >= 0.55) enter(panels[i], i);
+      else if (!e.isIntersecting) leave(panels[i]);
+    }), { threshold: [0, 0.55, 0.9] });
+    panels.forEach(o => io.observe(o.sec));
+  } else {
+    panels.forEach((o, i) => enter(o, i));
+  }
+  enter(panels[0], 0);
+
+  let tick = false;
+  function onScroll() {
+    if (tick) return; tick = true;
+    requestAnimationFrame(() => {
+      const vh = window.innerHeight;
+      panels.forEach(o => {
+        if (!o.vis) return;
+        const r = o.sec.getBoundingClientRect();
+        const prog = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh));
+        o.bg.style.transform = 'translateY(' + (prog * 6).toFixed(2) + '%) scale(1.06)';
+      });
+      tick = false;
+    });
+  }
+  if (!reduce) window.addEventListener('scroll', onScroll, { passive: true });
+}
+
+function copyHTML(s, i, N, px) {
+  px = px || 'mv';
+  return '<span class="' + px + '-copy__num">' + String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0') + '</span>' +
+    (s.eyebrow ? '<span class="' + px + '-copy__eyebrow">' + msesc(s.eyebrow) + '</span>' : '') +
+    (s.title ? '<h2 class="' + px + '-copy__title">' + msesc(s.title) + '</h2>' : '') +
+    (s.body ? '<p class="' + px + '-copy__body">' + msesc(s.body) + '</p>' : '') +
+    (s.tags && s.tags.length ? '<ul class="' + px + '-copy__tags">' + s.tags.map(t => '<li>' + msesc(t) + '</li>').join('') + '</ul>' : '') +
+    (s.cta ? '<div class="' + px + '-copy__cta">' +
+      (s.cta.primary ? '<a class="' + px + '-btn ' + px + '-btn--primary" href="' + msesc(s.cta.primary.href || '#') + '">' + msesc(s.cta.primary.label) + '</a>' : '') +
+      (s.cta.secondary ? '<a class="' + px + '-btn ' + px + '-btn--ghost" href="' + msesc(s.cta.secondary.href || '#') + '">' + msesc(s.cta.secondary.label) + '</a>' : '') +
+      '</div>' : '');
+}
+
+function msesc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function mel(t, c) { const n = document.createElement(t); if (c) n.className = c; return n; }
+function injectMobileCSS() {
+  if (document.getElementById('mv-css')) return;
+  const st = document.createElement('style'); st.id = 'mv-css';
+  st.textContent = `
+  .mv2-root{position:relative;z-index:1;--mv2-accent:#d17a42;}
+  .mv2-bar{position:fixed;top:0;left:0;right:0;z-index:70;display:flex;align-items:center;justify-content:space-between;
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:linear-gradient(180deg,rgba(10,10,12,.66),transparent);}
+  .mv2-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#f2f6fc;}
+  .mv2-brand__logo{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.16);}
+  .mv2-brand__name{font-family:var(--font-display,system-ui);font-weight:700;font-size:.98rem;}
+  .mv2-menu-btn{width:42px;height:42px;border:0;background:rgba(255,255,255,.06);border-radius:12px;display:grid;place-items:center;gap:4px;cursor:pointer;}
+  .mv2-menu-btn i{display:block;width:18px;height:2px;background:#f2f6fc;border-radius:2px;transition:transform .3s,opacity .3s;}
+  body.mv2-menu-open .mv2-menu-btn i:nth-child(1){transform:translateY(6px) rotate(45deg);}
+  body.mv2-menu-open .mv2-menu-btn i:nth-child(2){opacity:0;}
+  body.mv2-menu-open .mv2-menu-btn i:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
+  .mv2-menu{position:fixed;inset:0;z-index:69;background:rgba(10,10,12,.97);backdrop-filter:blur(6px);
+    display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 30px;
+    opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .3s,transform .3s;}
+  body.mv2-menu-open .mv2-menu{opacity:1;pointer-events:auto;transform:none;}
+  .mv2-menu a{font-family:var(--font-display,system-ui);font-weight:700;font-size:1.55rem;color:#f2f6fc;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);}
+  .mv2-menu a:last-child{border:0;color:var(--mv2-accent,#d17a42);}
+  .mv2-rail{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:65;display:flex;flex-direction:column;gap:9px;pointer-events:none;}
+  .mv2-rail i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.24);transition:all .35s ease;}
+  .mv2-rail i.on{background:var(--mv2-accent);height:20px;border-radius:3px;box-shadow:0 0 12px color-mix(in srgb,var(--mv2-accent) 70%,transparent);}
+  .mv2-eyebrow{display:block;font-family:var(--font-display,system-ui);font-weight:700;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mv2-accent);}
+  .mv2-chips{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px;}
+  .mv2-chips li{font-size:.76rem;font-weight:600;padding:7px 13px;border-radius:999px;color:#eef3f9;
+    background:color-mix(in srgb,var(--mv2-accent) 16%,rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--mv2-accent) 38%,transparent);
+    opacity:0;transform:translateY(10px);transition:opacity .5s ease .25s,transform .5s ease .25s;}
+  .mv2-live .mv2-chips li{opacity:1;transform:none;}
+
+  .mv2-panel{position:relative;min-height:100svh;min-height:100vh;overflow:hidden;display:flex;align-items:flex-end;scroll-snap-align:start;}
+  .mv2-panel__bg{position:absolute;inset:-3% -3%;will-change:transform;transform:scale(1.06);}
+  .mv2-panel__img,.mv2-panel__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 44%;}
+  .mv2-panel__video{opacity:0;transition:opacity .5s ease;}
+  .mv2-panel.mv2-hasvid .mv2-panel__video{opacity:1;}
+  @media (prefers-reduced-motion:no-preference){
+    .mv2-panel.mv2-live .mv2-panel__img{animation:mv2-kb 14s ease-out both;}
+    .mv2-panel:not(.mv2-vis) .mv2-panel__img{animation-play-state:paused;}
+  }
+  @keyframes mv2-kb{from{transform:scale(1.16)}to{transform:scale(1)}}
+  .mv2-panel__scrim{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg,rgba(10,10,12,.42) 0%,rgba(10,10,12,0) 24%,rgba(10,10,12,0) 46%,rgba(10,10,12,.66) 72%,rgba(10,10,12,.96) 100%);}
+  .mv2-panel__copy{position:relative;z-index:2;width:100%;padding:0 20px calc(40px + env(safe-area-inset-bottom));}
+  .mv2-panel--hero .mv2-panel__copy{padding-bottom:calc(56px + env(safe-area-inset-bottom));}
+  .mv2-panel__num{font-family:ui-monospace,Menlo,monospace;font-size:.68rem;letter-spacing:.14em;color:#9aa7b8;margin-bottom:8px;
+    opacity:0;transition:opacity .5s ease;} .mv2-live .mv2-panel__num{opacity:1;}
+  .mv2-panel__title{font-family:var(--font-display,system-ui);font-weight:700;color:#f8fbff;margin:10px 0 0;
+    font-size:clamp(2.3rem,10.5vw,3.4rem);line-height:1.02;letter-spacing:-.015em;text-shadow:0 3px 30px rgba(10,10,12,.85);}
+  .mv2-kt__w{display:inline-block;overflow:hidden;vertical-align:top;}
+  .mv2-kt__i{display:inline-block;transform:translateY(112%);transition:transform .7s cubic-bezier(.2,1,.3,1);}
+  .mv2-live .mv2-kt__i{transform:none;}
+  .mv2-kt__w:nth-child(2) .mv2-kt__i{transition-delay:.06s}
+  .mv2-kt__w:nth-child(3) .mv2-kt__i{transition-delay:.12s}
+  .mv2-kt__w:nth-child(4) .mv2-kt__i{transition-delay:.18s}
+  .mv2-kt__w:nth-child(n+5) .mv2-kt__i{transition-delay:.24s}
+  .mv2-panel__body{margin:16px 0 0;font-size:1.05rem;line-height:1.5;color:#d7deea;max-width:32ch;text-shadow:0 1px 12px rgba(10,10,12,.9);
+    opacity:0;transform:translateY(12px);transition:opacity .55s ease .18s,transform .55s ease .18s;}
+  .mv2-live .mv2-panel__body{opacity:1;transform:none;}
+  .mv2-panel__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;opacity:0;transform:translateY(12px);transition:opacity .55s ease .3s,transform .55s ease .3s;}
+  .mv2-live .mv2-panel__cta{opacity:1;transform:none;}
+  .mv2-btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 24px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.98rem;}
+  .mv2-btn--primary{background:var(--mv2-accent);color:#0a0a0c;}
+  .mv2-btn--ghost{color:#f2f6fc;border:1.5px solid rgba(255,255,255,.34);}
+  .mv2-scrollcue{display:inline-flex;align-items:center;gap:10px;margin-top:24px;text-decoration:none;color:#9aa7b8;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;}
+  .mv2-scrollcue i{width:20px;height:32px;border-radius:11px;border:2px solid rgba(255,255,255,.3);position:relative;}
+  .mv2-scrollcue i::after{content:"";position:absolute;left:50%;top:6px;width:3px;height:7px;border-radius:2px;background:var(--mv2-accent);transform:translateX(-50%);animation:mv2-wheel 1.7s ease-in-out infinite;}
+  @keyframes mv2-wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,9px)}}
+  @media (prefers-reduced-motion:reduce){ .mv2-kt__i{transform:none;} .mv2-panel__body,.mv2-panel__cta,.mv2-chips li,.mv2-panel__num{opacity:1;transform:none;} }
+  `;
+  document.head.appendChild(st);
+}
+
+function mountDesktopFlight(container, config) {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const S = config.sections || [];
+  const FRAMES = config.frameCount | 0;
+  const FDIR = config.frameDir || 'assets/frames/';
+  const N = S.length;
+  if (!N || !FRAMES) return false;
+  injectDFCSS();
+  container.classList.add('df-root');
+  container.style.setProperty('--df-accent', S[0].accent || '#d17a42');
+  const FEXT = config.frameExt || 'jpg';
+  const FIT = config.fit || 'contain';
+  const frameURL = i => FDIR + 'f' + String(i + 1).padStart(4, '0') + '.' + FEXT;
+
+  const bg = mel('div', 'df-bg');
+  const poster = mel('img', 'df-poster'); poster.src = frameURL(0); poster.alt = '';
+  const canvas = mel('canvas', 'df-canvas'); const ctx = canvas.getContext('2d', { alpha: false });
+  bg.appendChild(poster); bg.appendChild(canvas); bg.appendChild(mel('div', 'df-veil'));
+
+  const imgs = new Array(FRAMES), state = new Uint8Array(FRAMES);
+  let inflight = 0, seq = 0, firstDrawn = false;
+  const MAXP = config.maxParallel || 12;
+  const AHEAD = config.lookAhead || 14;
+  function want(i) {
+    i = Math.max(0, Math.min(FRAMES - 1, i));
+    if (state[i]) return;
+    state[i] = 1; inflight++;
+    const im = new Image(); im.decoding = 'async';
+    const done = () => { imgs[i] = im; state[i] = 2; inflight--; if (i === 0 && !firstDrawn) draw(0); pump(); };
+    im.onload = () => { if (im.decode) im.decode().then(done, done); else done(); };
+    im.onerror = () => { state[i] = 0; inflight--; if (i < seq) seq = i; pump(); };
+    im.src = frameURL(i);
+  }
+  function pump() { while (inflight < MAXP && seq < FRAMES) { if (!state[seq]) want(seq); seq++; } }
+  function nearestLoaded(i) {
+    if (state[i] === 2) return i;
+    for (let d = 1; d < FRAMES; d++) {
+      if (i - d >= 0 && state[i - d] === 2) return i - d;
+      if (i + d < FRAMES && state[i + d] === 2) return i + d;
+    }
+    return -1;
+  }
+  let cw = 0, chh = 0, dpr = 1;
+  function sizeCanvas() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    cw = window.innerWidth; chh = window.innerHeight;
+    canvas.width = Math.round(cw * dpr); canvas.height = Math.round(chh * dpr);
+    canvas.style.width = cw + 'px'; canvas.style.height = chh + 'px';
+    drawIdx(lastIdx, true);
+  }
+  let lastIdx = -1;
+  function draw(i) { drawIdx(i, false); }
+  function drawIdx(i, force) {
+    if (i < 0) return;
+    const use = nearestLoaded(i);
+    if (use < 0) return;
+    if (!force && use === lastIdx) return;
+    lastIdx = use;
+    const im = imgs[use]; if (!im) return;
+    const cvW = canvas.width, cvH = canvas.height;
+    const ir = im.width / im.height, cr = cvW / cvH;
+    let w, h, x, y;
+    if (FIT === 'contain') {
+      if (ir > cr) { w = cvW; h = w / ir; } else { h = cvH; w = h * ir; }
+      x = (cvW - w) / 2;
+      y = (cvH - h) * 0.42;
+      if (w < cvW - 1 || h < cvH - 1) { ctx.fillStyle = '#0a0a0c'; ctx.fillRect(0, 0, cvW, cvH); }
+    } else {
+      if (ir > cr) { h = cvH; w = h * ir; } else { w = cvW; h = w / ir; }
+      x = (cvW - w) / 2; y = (cvH - h) / 2 - h * 0.06;
+    }
+    ctx.drawImage(im, x, y, w, h);
+    if (!firstDrawn) { firstDrawn = true; bg.classList.add('df-on'); }
+  }
+
+  const bar = mel('div', 'df-bar');
+  const brand = mel('a', 'df-brand'); brand.href = (config.brand && config.brand.href) || '#top';
+  if (config.brand && config.brand.logo) { const lg = mel('img', 'df-brand__logo'); lg.src = config.brand.logo; lg.alt = config.brand.name || ''; brand.appendChild(lg); }
+  const bnm = mel('span', 'df-brand__name'); bnm.textContent = (config.brand && config.brand.name) || ''; brand.appendChild(bnm);
+  bar.appendChild(brand);
+  const nav = mel('nav', 'df-nav');
+  const navItems = S.map((s, i) => { const t = mel('button', 'df-nav__item'); t.textContent = s.label || ('0' + (i + 1)); t.addEventListener('click', () => jumpTo(i)); nav.appendChild(t); return t; });
+  bar.appendChild(nav);
+  if (config.cta && config.cta.label) { const c = mel('a', 'df-bar__cta'); c.href = config.cta.href || '#'; c.textContent = config.cta.label; bar.appendChild(c); }
+
+  const prog = mel('div', 'df-progress'); const progFill = mel('i'); prog.appendChild(progFill);
+
+  const copylayer = mel('div', 'df-copylayer');
+  const copies = S.map((s, i) => { const c = mel('article', 'df-copy'); c.innerHTML = copyHTML(s, i, N, 'df'); copylayer.appendChild(c); return c; });
+  const route = mel('div', 'df-route');
+  const dots = S.map((s, i) => { const d = mel('button', 'df-route__dot'); d.innerHTML = '<span>' + msesc(s.label || '') + '</span><i></i>'; d.addEventListener('click', () => jumpTo(i)); route.appendChild(d); return d; });
+  const hint = mel('div', 'df-hint'); hint.innerHTML = '<span>' + msesc(config.hint || 'scroll') + '</span><i></i>';
+
+  const track = mel('div', 'df-track');
+  [bg, bar, prog, copylayer, route, hint, track].forEach(n => container.appendChild(n));
+
+  const PER = config.scrollPer || 1.5;
+  track.style.height = (N * PER * 100) + 'vh';
+
+  let cur = 0, tgt = 0, ticking = false, active = -1, lastP = 0;
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const smooth = x => { x = clamp(x); return x * x * (3 - 2 * x); };
+  const lerpColor = (c1, c2, t) => {
+    const p = h => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+    const a = p(c1), b = p(c2);
+    return 'rgb(' + a.map((v, k) => Math.round(v + (b[k] - v) * t)).join(',') + ')';
+  };
+
+  function jumpTo(i) { window.scrollTo({ top: track.offsetTop + (i + 0.5) / N * (track.offsetHeight - window.innerHeight), behavior: reduce ? 'auto' : 'smooth' }); }
+
+  want(0); pump();
+
+  function read() {
+    const vh = window.innerHeight;
+    const h = track.offsetHeight - vh;
+    const p = h > 0 ? clamp((window.scrollY - track.offsetTop) / h) : 0;
+    tgt = p;
+    const ti = Math.round(p * (FRAMES - 1));
+    const dir = p >= lastP ? 1 : -1; lastP = p;
+    for (let k = -2; k <= AHEAD; k++) want(ti + k * dir);
+    const pn = p * N;
+    const near = Math.min(N - 1, Math.max(0, Math.round(pn - 0.5)));
+    for (let i = 0; i < N; i++) {
+      let op = 0, ty = 10;
+      if (i === near) { const d = Math.abs(pn - (i + 0.5)); op = 0.6 + 0.4 * smooth(1 - d / 0.5); ty = (0.5 - d) * 8; }
+      copies[i].style.opacity = op.toFixed(3);
+      copies[i].style.transform = 'translateY(' + ty.toFixed(1) + 'px)';
+      copies[i].style.pointerEvents = op > 0.6 ? 'auto' : 'none';
+    }
+    if (near !== active) {
+      active = near;
+      dots.forEach((d, k) => d.classList.toggle('is-active', k === near));
+      navItems.forEach((d, k) => d.classList.toggle('is-active', k === near));
+    }
+    const a0 = S[near].accent || '#d17a42';
+    const a1 = S[Math.min(N - 1, near + 1)].accent || a0;
+    const frac = clamp(pn - near - 0.5);
+    container.style.setProperty('--df-accent', lerpColor(a0, a1, smooth(frac)));
+    progFill.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    hint.style.opacity = clamp(1 - pn * 2);
+    bar.style.setProperty('--df-barbg', p > 0.01 ? '.66' : '.32');
+    ticking = false;
+  }
+  function raf() {
+    cur += (tgt - cur) * (config.chase || 0.16);
+    drawIdx(Math.round(clamp(cur) * (FRAMES - 1)), false);
+    requestAnimationFrame(raf);
+  }
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
+  window.addEventListener('resize', () => { sizeCanvas(); read(); });
+  sizeCanvas();
+  read();
+  requestAnimationFrame(raf);
+  return true;
+}
+
+function injectDFCSS() {
+  if (document.getElementById('df-css')) return;
+  const st = document.createElement('style'); st.id = 'df-css';
+  st.textContent = `
+  .df-root{position:relative;z-index:1;--df-accent:#d17a42;}
+  .df-bg{position:fixed;inset:0;z-index:0;background:#0a0a0c;overflow:hidden;}
+  .df-poster,.df-canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .df-poster{object-fit:cover;object-position:center 44%;}
+  .df-canvas{opacity:0;transition:opacity .4s ease;}
+  .df-on .df-canvas{opacity:1;} .df-on .df-poster{opacity:0;transition:opacity .5s ease;}
+  .df-veil{position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(90deg,rgba(10,10,12,.82) 0%,rgba(10,10,12,.45) 32%,rgba(10,10,12,.08) 60%,transparent 100%),
+      linear-gradient(180deg,rgba(10,10,12,.5) 0%,transparent 22%,transparent 70%,rgba(10,10,12,.6) 100%);}
+  .df-bar{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;
+    gap:16px;padding:clamp(14px,2.2vw,24px) clamp(20px,4vw,56px);
+    background:linear-gradient(180deg,rgba(10,10,12,var(--df-barbg,.32)),transparent);transition:background .3s;}
+  .df-brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:#f2f6fc;}
+  .df-brand__logo{width:42px;height:42px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.16);}
+  .df-brand__name{font-family:var(--font-display,system-ui);font-weight:700;font-size:1.08rem;}
+  .df-nav{display:flex;gap:4px;padding:5px;border-radius:999px;background:color-mix(in srgb,#141014 78%,transparent);
+    border:1px solid color-mix(in srgb,var(--df-accent) 30%,transparent);}
+  .df-nav__item{font:inherit;font-size:.8rem;color:#aab6c8;border:0;background:transparent;cursor:pointer;padding:7px 14px;border-radius:999px;transition:color .25s,background .25s;}
+  .df-nav__item:hover{color:#fff;} .df-nav__item.is-active{color:#0a0a0c;background:var(--df-accent);}
+  .df-bar__cta{text-decoration:none;font-weight:600;font-size:.9rem;color:#0a0a0c;background:var(--df-accent);
+    padding:10px 20px;border-radius:999px;white-space:nowrap;box-shadow:0 10px 26px -12px color-mix(in srgb,var(--df-accent) 70%,transparent);}
+  .df-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:61;background:color-mix(in srgb,var(--df-accent) 14%,transparent);}
+  .df-progress i{display:block;height:100%;width:100%;transform-origin:0 50%;transform:scaleX(0);background:var(--df-accent);}
+  .df-copylayer{position:fixed;inset:0;z-index:20;pointer-events:none;}
+  .df-copy{position:absolute;left:0;bottom:0;width:min(56vw,620px);
+    padding:0 clamp(20px,4vw,56px) clamp(48px,8vh,110px);opacity:0;transition:opacity .4s ease,transform .4s ease;}
+  .df-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:#93a2b8;}
+  .df-copy__eyebrow{display:block;margin-top:16px;font-family:var(--font-display,system-ui);font-weight:700;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--df-accent);}
+  .df-copy__title{font-family:var(--font-display,system-ui);font-weight:700;color:#f7fafe;
+    font-size:clamp(2.2rem,4.4vw,3.5rem);line-height:1.03;margin:12px 0 0;letter-spacing:-.01em;text-shadow:0 3px 30px rgba(10,10,12,.9);}
+  .df-copy__body{margin-top:18px;font-size:clamp(1rem,1.2vw,1.14rem);line-height:1.55;color:#dbe2ec;max-width:42ch;text-shadow:0 2px 14px rgba(10,10,12,.92);}
+  .df-copy__tags{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:9px;}
+  .df-copy__tags li{font-size:.8rem;font-weight:600;padding:7px 14px;border-radius:999px;color:#eef3f9;
+    background:color-mix(in srgb,var(--df-accent) 20%,rgba(10,10,12,.4));border:1px solid color-mix(in srgb,var(--df-accent) 40%,transparent);}
+  .df-copy__cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:26px;}
+  .df-btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 26px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.98rem;pointer-events:auto;}
+  .df-btn--primary{background:var(--df-accent);color:#0a0a0c;}
+  .df-btn--ghost{color:#f2f6fc;border:1.5px solid rgba(255,255,255,.34);}
+  .df-route{position:fixed;right:clamp(16px,2.4vw,30px);top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;gap:20px;}
+  .df-route__dot{position:relative;border:0;background:transparent;cursor:pointer;width:14px;height:14px;display:grid;place-items:center;}
+  .df-route__dot i{width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--df-accent) 40%,transparent);transition:transform .3s,background .3s,box-shadow .3s;}
+  .df-route__dot.is-active i{background:var(--df-accent);transform:scale(1.4);box-shadow:0 0 0 5px color-mix(in srgb,var(--df-accent) 22%,transparent);}
+  .df-route__dot span{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-size:.76rem;font-weight:600;color:#f2f6fc;
+    background:color-mix(in srgb,#141014 88%,transparent);padding:5px 11px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;}
+  .df-route__dot:hover span,.df-route__dot.is-active span{opacity:1;transform:translateY(-50%);}
+  .df-hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;align-items:center;gap:9px;
+    font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:#93a2b8;transition:opacity .3s;}
+  .df-hint i{width:22px;height:34px;border-radius:12px;border:2px solid rgba(255,255,255,.28);position:relative;}
+  .df-hint i::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:7px;border-radius:2px;background:var(--df-accent);transform:translateX(-50%);animation:df-wheel 1.7s ease-in-out infinite;}
+  @keyframes df-wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}60%{opacity:1}100%{opacity:0;transform:translate(-50%,10px)}}
+  .df-track{position:relative;z-index:1;width:100%;pointer-events:none;}
+  body.past-flight .df-route,body.past-flight .df-hint,body.past-flight .df-copylayer{opacity:0!important;pointer-events:none;transition:opacity .5s ease;}
+  @media (prefers-reduced-motion:reduce){ .df-hint i::after{animation:none;} }
+
+  .df-root--m .df-veil{
+    background:linear-gradient(180deg,rgba(10,10,12,.34) 0%,transparent 20%,transparent 42%,rgba(10,10,12,.62) 74%,rgba(10,10,12,.9) 100%);}
+  .df-root--m .df-bar{padding:11px 14px;gap:10px;}
+  .df-root--m .df-brand__logo{width:34px;height:34px;}
+  .df-root--m .df-brand__name{font-size:.98rem;}
+  .df-root--m .df-nav{display:none;}
+  .df-root--m .df-bar__cta{font-size:.8rem;padding:9px 15px;}
+  .df-root--m .df-copy{width:auto;right:0;padding:0 20px calc(env(safe-area-inset-bottom,0px) + clamp(84px,15vh,140px));}
+  .df-root--m .df-copy__title{font-size:clamp(2.35rem,8.6vw,3rem);line-height:1.02;}
+  .df-root--m .df-copy__body{font-size:1rem;max-width:34ch;}
+  .df-root--m .df-copy__cta{margin-top:20px;}
+  .df-root--m .df-btn{padding:13px 22px;font-size:.94rem;}
+  .df-root--m .df-route{right:9px;gap:13px;}
+  .df-root--m .df-route__dot span{display:none;}
+  .df-root--m .df-hint{bottom:calc(env(safe-area-inset-bottom,0px) + 14px);font-size:.68rem;}
+  `;
+  document.head.appendChild(st);
+}
+
+function mountScrollWorld(container, config) {
+  const isPhone = window.matchMedia('(hover: none) and (pointer: coarse)').matches || window.innerWidth <= 860;
+  if (isPhone && config.frameCountMobile) {
+    container.classList.add('df-root--m');
+    const mcfg = Object.assign({}, config, {
+      frameDir: config.frameDirMobile || 'assets/frames-m/',
+      frameCount: config.frameCountMobile,
+      frameExt: config.frameExtMobile || 'jpg',
+      scrollPer: config.scrollPerMobile || 1.15,
+      maxParallel: config.maxParallelMobile || 24,
+      lookAhead: config.lookAheadMobile || 26,
+      chase: config.chaseMobile || 0.12,
+      fit: config.fitMobile || 'contain'
+    });
+    if (mountDesktopFlight(container, mcfg)) return;
+    container.classList.remove('df-root--m');
+  }
+  if (isPhone) return mountMobileStory(container, config);
+  if (config.frameCount) mountDesktopFlight(container, config);
+}
+
+/* ✏️ EDIT: this whole object is the flight. brand + cta + the 4 scenes.
+   frameCount / frameCountMobile MUST equal the number of files in
+   assets/frames/ and assets/frames-m/ once generate-scenes.mjs +
+   build-frames.sh have run (currently blocked — see report: fal.ai
+   returned "Exhausted balance", so assets/frames/ does not exist yet
+   and this flight will render nothing until frameCount is set for real). */
+mountScrollWorld(document.getElementById('world'), {
+  brand: { name: 'OPM Ventures', href: '#top' },
+  cta: { label: 'Work With Us', href: '#connect' },
+  frameCount: 0,          // ← set to the actual file count in assets/frames/ after build-frames.sh
+  frameDir: 'assets/frames/',
+  frameExt: 'jpg',
+  maxParallel: 16,
+  lookAhead: 18,
+  frameCountMobile: 0,    // ← set to the actual file count in assets/frames-m/
+  frameDirMobile: 'assets/frames-m/',
+  frameExtMobile: 'webp',
+  scrollPerMobile: 1.15,
+  hint: 'scroll to step inside',
+  scrollPer: 1.5,
+  chase: 0.16,
+  sections: [
+    {
+      id: 's1', label: 'Command',
+      accent: '#d17a42',
+      scroll: 1.6, linger: 0.35,
+      eyebrow: 'OPM Ventures LLC',
+      title: 'AI That Works While You Serve',
+      body: 'Autonomous agents that generate leads, draft outreach, and dispatch tasks around the clock — built by an operator who can\'t afford to stop.',
+      tags: ['Recon Agent — Active', 'Comms Agent — Active', 'Command — On Duty'],
+    },
+    {
+      id: 's2', label: 'The Network',
+      accent: '#dc8a52',
+      eyebrow: 'How it works',
+      title: 'Three Agents. One Pipeline.',
+      body: 'Recon finds the leads. Comms drafts the outreach. Command routes and dispatches. Each agent specializes so the system compounds instead of bottlenecking.',
+      tags: ['Perception', 'Decision', 'Execution'],
+    },
+    {
+      id: 's3', label: 'The Reach',
+      accent: '#e69a66',
+      eyebrow: 'The result',
+      title: 'Leads While You Sleep.',
+      body: 'The daily scheduler fires at 8 AM. Recon runs its scan. Comms drafts the messages. Command logs the tasks. By the time you check your phone, the work is done.',
+      tags: ['8AM Daily', 'San Antonio, TX', 'Relive Realty'],
+    },
+    {
+      id: 's4', label: 'The Work',
+      accent: '#3f8f8a',
+      scroll: 1.6, linger: 0.4,
+      eyebrow: 'Built for operators',
+      title: 'Built for Operators.',
+      body: 'REMY OS was built because military schedules don’t accommodate business hours. If your time is genuinely limited, autonomous systems aren’t a luxury — they’re the only way to compete.',
+      tags: [],
+      cta: {
+        primary:   { label: 'See the System', href: '#systems' },
+        secondary: { label: 'Get In Touch', href: '#connect' },
+      },
+    },
+  ],
+});
+
 // ── CURSOR ───────────────────────────────────────────
 const cur   = document.getElementById('cursor');
 const cring = document.getElementById('cursor-ring');
@@ -1681,127 +2003,8 @@ document.querySelectorAll('.sys-card, .rev-card').forEach(card => {
   });
 });
 
-// ── MORPHING BLOBS ───────────────────────────────────
-gsap.to('#blob1', {
-  borderRadius: '62% 38% 55% 45% / 48% 62% 38% 52%',
-  x: 40, y: 20,
-  duration: 9, ease: 'sine.inOut', yoyo: true, repeat: -1
-});
-gsap.to('#blob2', {
-  borderRadius: '45% 55% 38% 62% / 55% 45% 62% 38%',
-  x: -30, y: -20,
-  duration: 11, ease: 'sine.inOut', yoyo: true, repeat: -1
-});
-gsap.to('#blob3', {
-  borderRadius: '55% 45% 60% 40% / 42% 58% 42% 58%',
-  scale: 1.15,
-  duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1
-});
-
-// ── HERO CANVAS — cinematic particle field (active until Kling video ready) ──
-(function initHeroCanvas() {
-  const canvas = document.getElementById('hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // Neural network nodes
-  const nodes = Array.from({ length: 60 }, () => ({
-    x: Math.random(), y: Math.random(),
-    vx: (Math.random() - 0.5) * 0.0003,
-    vy: (Math.random() - 0.5) * 0.0003,
-    r: 1 + Math.random() * 2,
-    color: Math.random() > 0.6 ? '#6366f1' : Math.random() > 0.5 ? '#06b6d4' : '#a78bfa'
-  }));
-
-  function draw(t) {
-    requestAnimationFrame(draw);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw edges between close nodes
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = (nodes[i].x - nodes[j].x) * canvas.width;
-        const dy = (nodes[i].y - nodes[j].y) * canvas.height;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 160) {
-          ctx.globalAlpha = (1 - dist / 160) * 0.18;
-          ctx.strokeStyle = nodes[i].color;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x * canvas.width, nodes[i].y * canvas.height);
-          ctx.lineTo(nodes[j].x * canvas.width, nodes[j].y * canvas.height);
-          ctx.stroke();
-        }
-      }
-    }
-
-    // Draw nodes
-    nodes.forEach(n => {
-      n.x += n.vx; n.y += n.vy;
-      if (n.x < 0) n.x = 1; if (n.x > 1) n.x = 0;
-      if (n.y < 0) n.y = 1; if (n.y > 1) n.y = 0;
-      ctx.globalAlpha = 0.55;
-      ctx.fillStyle = n.color;
-      ctx.beginPath();
-      ctx.arc(n.x * canvas.width, n.y * canvas.height, n.r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.globalAlpha = 1;
-  }
-  draw(0);
-})();
-
-// ── SCROLL-SCRUBBED HERO VIDEO (kling-motion-web-p pattern) ──
-// Activates automatically once assets/hero-loop.mp4 exists (after generate-assets.mjs)
-const heroVideo  = document.getElementById('hero-video');
-const heroDriver = document.getElementById('hero-driver');
-const heroWrap   = document.getElementById('hero-video-wrap');
-const heroCanvas = document.getElementById('hero-canvas');
-
-heroVideo.pause();
-
-heroVideo.addEventListener('loadedmetadata', () => {
-  // Video loaded — show it, hide canvas
-  heroVideo.style.display = 'block';
-  if (heroCanvas) heroCanvas.style.display = 'none';
-  updateVideo();
-});
-
-let videoTicking = false;
-function updateVideo() {
-  if (videoTicking) return;
-  videoTicking = true;
-  requestAnimationFrame(() => {
-    const rect = heroDriver.getBoundingClientRect();
-    const total = heroDriver.offsetHeight - window.innerHeight;
-    const scrolled = -rect.top;
-    const p = Math.max(0, Math.min(1, scrolled / total));
-    if (heroVideo.duration) heroVideo.currentTime = p * heroVideo.duration;
-    gsap.set(heroWrap, { opacity: p > 0.02 ? Math.min(p * 4, 1) : 0 });
-    videoTicking = false;
-  });
-}
-lenis.on('scroll', updateVideo);
-
 // ── NAV entrance ─────────────────────────────────────
 gsap.to('#nav', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.4 });
-
-// ── HERO entrance ────────────────────────────────────
-const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-heroTl
-  .fromTo('#hero-status',  { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 0.5)
-  .fromTo('#hero-eyebrow', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 0.65)
-  .fromTo('#hero-hed',     { opacity: 0, y: 48, filter: 'blur(12px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.95 }, 0.8)
-  .fromTo('#hero-sub',     { opacity: 0, y: 28, filter: 'blur(6px)' },  { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8 }, 1.1)
-  .fromTo('#hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, 1.3)
-  .fromTo('#hero-scroll',  { opacity: 0 },        { opacity: 1, duration: 0.6 }, 1.7);
 
 // ── EXPLAINER — pinned scroll concepts ───────────────
 const concepts = [
@@ -1935,93 +2138,9 @@ gsap.from('footer', { opacity: 0, duration: 0.6, scrollTrigger: ST('footer', 'to
 //  Grid / mid elements at 40–60%. Creates cinematic depth.
 // ══════════════════════════════════════════════════════════════════
 
-// ── HERO DEPTH LAYERS ────────────────────────────────────────────────────────
-// Hero is position:sticky inside 280svh driver.
-// As scroll moves through the driver (progress 0→1) we translate the internal
-// layers at different speeds — background drifts slower, creating 3D depth.
-
-// Far layer: canvas (neural network) — slowest + slight scale zoom
-gsap.to('#hero-canvas', {
-  y: () => window.innerHeight * -0.18,
-  scale: 1.12,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
-
-// Mid-far layer: blob 1 (upper left) — drifts up + left
-gsap.to('#blob1', {
-  y: () => window.innerHeight * -0.24,
-  x: 60,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
-
-// Mid-far layer: blob 2 (lower right) — drifts up + right
-gsap.to('#blob2', {
-  y: () => window.innerHeight * -0.30,
-  x: -50,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
-
-// Mid layer: blob 3 (centre) — slowest vertical movement
-gsap.to('#blob3', {
-  y: () => window.innerHeight * -0.14,
-  scale: 1.08,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
-
-// Near-background layer: tech grid — faster than canvas, slower than content
-gsap.to('.hero-grid', {
-  y: () => window.innerHeight * -0.38,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
-
-// Hero content — barely moves (it's the foreground reference anchor)
-// Small upward float gives subtle "pulling through" camera feel
-gsap.to('.hero-content', {
-  y: () => window.innerHeight * -0.05,
-  ease: 'none',
-  scrollTrigger: {
-    trigger: '#hero-driver',
-    start: 'top top',
-    end: 'bottom bottom',
-    scrub: true,
-    invalidateOnRefresh: true
-  }
-});
+// Hero depth-layering is now owned by the ported flight engine (mountScrollWorld)
+// — see the SCROLL WORLD block below. The old #hero-canvas/.blob/.hero-grid
+// parallax is gone along with the DOM it targeted.
 
 // ── SECTION ATMOSPHERIC PARALLAX ─────────────────────────────────────────────
 // Each section's background orb moves at ~40-55% of the section's scroll height.
