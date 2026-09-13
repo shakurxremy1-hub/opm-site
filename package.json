@@ -1,0 +1,18 @@
+{
+  "name": "opm-ventures-site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "generate-hero.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "reviews": "node fetch-reviews.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@fal-ai/client": "^1.10.1",
+    "node-fetch": "^3.3.2"
+  }
+}

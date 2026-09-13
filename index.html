@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPM Ventures — AI That Works While You Serve</title>
+<meta name="description" content="Autonomous AI systems for operators who can't afford to stop. Built by Shakur Remy, active duty military, AI founder.">
+
+<!-- Fonts: Geist -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- GSAP 3.13 -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/CustomEase.min.js"></script>
+
+<!-- Lenis smooth scroll -->
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+
+<style>
+/* ══════════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: auto; }
+body {
+  font-family: 'Geist', system-ui, sans-serif;
+  background: #050508;
+  color: #ffffff;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img, video { display: block; max-width: 100%; }
+
+/* ══════════════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════════════ */
+:root {
+  --bg:        #050508;
+  --surface:   #0c0c12;
+  --surface-2: #101018;
+  --border:    rgba(255,255,255,0.06);
+  --border-hi: rgba(255,255,255,0.11);
+
+  --indigo:    #6366f1;
+  --indigo-lt: #818cf8;
+  --cyan:      #06b6d4;
+  --violet:    #a78bfa;
+  --amber:     #f59e0b;
+  --green:     #10b981;
+
+  --text-1:    #ffffff;
+  --text-2:    rgba(255,255,255,0.65);
+  --text-3:    rgba(255,255,255,0.35);
+  --text-4:    rgba(255,255,255,0.20);
+}
+
+/* ══════════════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════════════ */
+#cursor, #cursor-ring {
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+#cursor {
+  width: 5px; height: 5px;
+  background: var(--indigo);
+  border-radius: 50%;
+}
+#cursor-ring {
+  width: 28px; height: 28px;
+  border: 1px solid rgba(99,102,241,0.4);
+  border-radius: 50%;
+  transition: width .18s, height .18s, border-color .18s;
+}
+body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(99,102,241,0.8); }
+
+/* ══════════════════════════════════════════════════
+   FLOATING GLASS NAV
+══════════════════════════════════════════════════ */
+#nav-wrapper {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+  pointer-events: none;
+}
+#nav {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 24px;
+  border-radius: 100px;
+  background: rgba(5,5,8,0.72);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--border-hi);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  opacity: 0;
+  transform: translateY(-12px);
+}
+.nav-logo {
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  margin-right: 8px;
+}
+.nav-logo span { color: var(--indigo); }
+.nav-links {
+  display: flex; gap: 2px; list-style: none;
+}
+.nav-links a {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-3);
+  padding: 6px 14px;
+  border-radius: 100px;
+  transition: color .15s, background .15s;
+  letter-spacing: -0.01em;
+}
+.nav-links a:hover { color: var(--text-1); background: rgba(255,255,255,0.05); }
+
+/* Button-in-Button CTA */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px 7px 16px;
+  border-radius: 100px;
+  background: var(--indigo);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+  transition: opacity .15s;
+  cursor: none;
+}
+.nav-btn:hover { opacity: 0.88; }
+.nav-btn-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem;
+  transition: transform .5s cubic-bezier(0.32,0.72,0,1);
+}
+.nav-btn:hover .nav-btn-icon { transform: translate(1px, -1px) scale(1.1); }
+
+/* ══════════════════════════════════════════════════
+   SECTION SHARED
+══════════════════════════════════════════════════ */
+.s-wrap { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid rgba(99,102,241,0.25);
+  background: rgba(99,102,241,0.07);
+  color: var(--indigo-lt);
+  margin-bottom: 28px;
+}
+.eyebrow-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--indigo);
+  animation: blink 2.4s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+/* ══════════════════════════════════════════════════
+   HERO  (scroll-scrubbed Kling video + blobs)
+══════════════════════════════════════════════════ */
+#hero-driver {
+  position: relative;
+  min-height: 280svh;
+}
+#hero {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Morphing blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform, border-radius;
+  pointer-events: none;
+}
+.blob-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%);
+  top: -100px; left: -100px;
+}
+.blob-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(6,182,212,0.16) 0%, transparent 70%);
+  bottom: -80px; right: -80px;
+}
+.blob-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(167,139,250,0.12) 0%, transparent 70%);
+  top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Scroll-scrubbed video / canvas layer */
+#hero-video-wrap {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+}
+#hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0.35;
+}
+#hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.18;
+}
+.hero-video-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, #050508 90%),
+    linear-gradient(to bottom, #050508 0%, transparent 15%, transparent 85%, #050508 100%);
+}
+
+/* Grid lines — subtle tech feel */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+
+/* Hero content */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  padding: 0 32px;
+  max-width: 1000px;
+}
+#hero-eyebrow { margin-bottom: 32px; }
+.hero-hed {
+  font-size: clamp(3rem, 7vw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  color: var(--text-1);
+  margin-bottom: 28px;
+}
+.hero-hed .accent { color: transparent; background: linear-gradient(135deg, var(--indigo-lt), var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+.hero-sub {
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-weight: 400;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto 44px;
+  letter-spacing: -0.01em;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Button-in-Button (primary) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px 14px 24px;
+  border-radius: 100px;
+  background: var(--indigo);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+  transition: opacity .2s;
+  cursor: none;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-icon {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.16);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  transition: transform .6s cubic-bezier(0.32,0.72,0,1);
+}
+.btn-primary:hover .btn-icon { transform: translate(2px,-2px) scale(1.12); }
+
+/* Button ghost */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  border-radius: 100px;
+  border: 1px solid var(--border-hi);
+  background: rgba(255,255,255,0.03);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-2);
+  letter-spacing: -0.01em;
+  transition: border-color .2s, color .2s;
+  cursor: none;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.22); color: var(--text-1); }
+
+/* Scroll indicator */
+#hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+#hero-scroll span {
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+.scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, rgba(99,102,241,0.6), transparent);
+  animation: scrollPulse 2.2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%,100%{opacity:0.3;transform:scaleY(0.5);transform-origin:top}
+  50%{opacity:1;transform:scaleY(1)}
+}
+
+/* Status bar above hero headline */
+.hero-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  margin-bottom: 40px;
+  font-size: 0.72rem;
+  color: var(--text-3);
+  letter-spacing: -0.01em;
+}
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.live-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: blink 2.2s ease-in-out infinite;
+}
+.live-dot.amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.status-sep { width: 1px; height: 14px; background: var(--border-hi); }
+
+/* ══════════════════════════════════════════════════
+   EXPLAINER — pinned scroll, 4 concepts
+══════════════════════════════════════════════════ */
+#explainer-driver {
+  position: relative;
+  height: 450svh;
+}
+#explainer {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+.explainer-inner {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.explainer-left { position: relative; }
+.exp-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.exp-hed {
+  font-size: clamp(2.4rem, 4vw, 3.8rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 28px;
+}
+.exp-hed .g { background: linear-gradient(135deg, var(--indigo-lt), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.exp-body {
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--text-2);
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  max-width: 460px;
+}
+
+/* Concept cards on the right */
+.concept-stack {
+  position: relative;
+  height: 340px;
+}
+.concept-card {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.concept-card.visible { opacity: 1; pointer-events: auto; }
+
+/* Double-Bezel card */
+.dbl-bezel {
+  padding: 2px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border-hi);
+}
+.dbl-bezel-inner {
+  padding: 32px;
+  border-radius: calc(24px - 2px);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.concept-num {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--indigo);
+  letter-spacing: 0.1em;
+  margin-bottom: 20px;
+}
+.concept-icon {
+  font-size: 2.4rem;
+  margin-bottom: 20px;
+}
+.concept-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+}
+.concept-body {
+  font-size: 0.95rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+}
+
+/* Progress dots */
+.exp-progress {
+  display: flex;
+  gap: 8px;
+  margin-top: 36px;
+}
+.exp-dot {
+  width: 20px; height: 3px;
+  border-radius: 2px;
+  background: var(--border-hi);
+  transition: background .3s, width .3s;
+}
+.exp-dot.active { background: var(--indigo); width: 36px; }
+
+/* ══════════════════════════════════════════════════
+   SYSTEMS — 6 double-bezel cards grid
+══════════════════════════════════════════════════ */
+#systems {
+  padding: 160px 0;
+  position: relative;
+}
+.systems-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 64px;
+}
+.sys-card {
+  padding: 2px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  transition: border-color .3s;
+  cursor: none;
+}
+.sys-card:hover { border-color: rgba(99,102,241,0.3); }
+.sys-card-inner {
+  padding: 28px 28px 26px;
+  border-radius: calc(20px - 2px);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+}
+.sys-card-inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.sys-card:hover .sys-card-inner::before { opacity: 1; }
+
+.sys-cat {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--indigo-lt);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.55rem;
+  color: var(--green);
+  letter-spacing: 0.1em;
+}
+.live-badge::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 5px var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+
+.sys-icon { font-size: 1.8rem; margin-bottom: 16px; }
+.sys-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.sys-body {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: var(--text-2);
+  flex: 1;
+  margin-bottom: 20px;
+}
+.sys-tags {
+  display: flex; flex-wrap: wrap; gap: 5px;
+}
+.sys-tag {
+  font-size: 0.58rem;
+  padding: 3px 9px;
+  border-radius: 100px;
+  border: 1px solid var(--border-hi);
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+
+/* Section headline */
+.section-hed {
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+.section-hed .g {
+  background: linear-gradient(135deg, var(--indigo-lt), var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.section-sub {
+  font-size: 1rem;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 480px;
+  margin-top: 16px;
+  letter-spacing: -0.01em;
+}
+
+/* ══════════════════════════════════════════════════
+   VISION — stats + mission
+══════════════════════════════════════════════════ */
+#vision {
+  padding: 160px 0;
+  border-top: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.vision-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: start;
+  margin-top: 72px;
+}
+.vision-quote {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  color: var(--text-1);
+}
+.vision-quote em {
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-2);
+}
+.vision-attr {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.vision-avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-hi);
+}
+.vision-attr-text strong {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.vision-attr-text span {
+  font-size: 0.75rem;
+  color: var(--text-3);
+}
+
+.vision-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.vstat {
+  padding: 2px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+}
+.vstat-inner {
+  padding: 28px 24px;
+  border-radius: calc(16px - 2px);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.vstat-num {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--text-1), rgba(255,255,255,0.6));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.vstat-label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Flowing indigo line behind vision */
+.vision-glow {
+  position: absolute;
+  width: 600px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--indigo), transparent);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════
+   CONNECT — CTA / contact
+══════════════════════════════════════════════════ */
+#connect {
+  padding: 160px 0 120px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.connect-orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.orb-1 {
+  width: 400px; height: 400px;
+  background: rgba(99,102,241,0.12);
+  top: -100px; left: 50%;
+  transform: translateX(-50%);
+}
+.orb-2 {
+  width: 300px; height: 300px;
+  background: rgba(6,182,212,0.08);
+  bottom: -80px; right: 100px;
+}
+.orb-3 {
+  width: 250px; height: 250px;
+  background: rgba(167,139,250,0.1);
+  bottom: -60px; left: 80px;
+}
+.connect-hed {
+  font-size: clamp(3rem, 6vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin: 24px 0 20px;
+  position: relative;
+  z-index: 2;
+}
+.connect-hed .g {
+  background: linear-gradient(135deg, var(--indigo-lt), var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.connect-sub {
+  font-size: 1.05rem;
+  color: var(--text-2);
+  max-width: 460px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  position: relative; z-index: 2;
+}
+.connect-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 72px;
+  position: relative; z-index: 2;
+}
+.connect-links {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  flex-wrap: wrap;
+  position: relative; z-index: 2;
+}
+.connect-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+.connect-item-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-4);
+}
+.connect-item-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-2);
+  transition: color .2s;
+  letter-spacing: -0.01em;
+}
+.connect-item:hover .connect-item-value { color: var(--indigo-lt); }
+.connect-divider {
+  width: 1px; height: 36px;
+  background: var(--border-hi);
+  align-self: center;
+}
+
+/* ══════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.68rem;
+  color: var(--text-4);
+  letter-spacing: -0.01em;
+}
+.footer-links {
+  display: flex; gap: 24px;
+}
+.footer-links a {
+  color: var(--text-4);
+  transition: color .2s;
+}
+.footer-links a:hover { color: var(--text-2); }
+
+/* ══════════════════════════════════════════════════
+   TERMINAL TICKER — ambient data stream
+══════════════════════════════════════════════════ */
+.ticker-wrap {
+  position: relative;
+  overflow: hidden;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 80px 0;
+}
+.ticker-inner {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: ticker 28s linear infinite;
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--text-3);
+  letter-spacing: 0.04em;
+}
+.ticker-item { display: inline-flex; align-items: center; gap: 10px; }
+.ticker-item::before { content: '//'; color: var(--indigo); opacity: 0.5; }
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ══════════════════════════════════════════════════
+   GTA VI PARALLAX SYSTEM
+══════════════════════════════════════════════════ */
+/* GPU-accelerated parallax layers */
+#hero-canvas, .blob, .hero-grid { will-change: transform; }
+
+/* Section atmospheric backgrounds — large, blurred, parallax slower than content */
+.section-atmo {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+  will-change: transform;
+  z-index: 0;
+}
+#sys-atmo {
+  width: 1100px; height: 900px;
+  background: radial-gradient(ellipse, rgba(99,102,241,0.13) 0%, transparent 68%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+#vis-atmo {
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 68%);
+  top: 10%; right: -200px;
+}
+#conn-atmo {
+  width: 900px; height: 700px;
+  background: radial-gradient(ellipse, rgba(167,139,250,0.11) 0%, transparent 68%);
+  top: 20%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Sections need overflow:hidden to clip large parallax orbs */
+#systems { overflow: hidden; }
+
+/* ══════════════════════════════════════════════════
+   REVIEWS — Google Business Profile
+══════════════════════════════════════════════════ */
+#reviews { padding: 160px 0; position: relative; overflow: hidden; }
+#rev-atmo {
+  width: 900px; height: 800px;
+  background: radial-gradient(ellipse, rgba(245,158,11,0.08) 0%, transparent 68%);
+  top: 8%; left: -220px;
+}
+.rev-summary {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  margin-top: 44px;
+  padding: 22px 26px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.025);
+}
+.rev-score {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.rev-summary-mid { display: flex; flex-direction: column; gap: 5px; }
+.rev-stars { color: var(--amber); font-size: 1rem; letter-spacing: 2px; }
+.rev-stars .empty { color: var(--text-4); }
+.rev-count {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.rev-g {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.rev-summary-actions { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+.rev-card {
+  padding: 2px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  transition: border-color .3s;
+  cursor: none;
+}
+.rev-card:hover { border-color: rgba(245,158,11,0.28); }
+.rev-card-inner {
+  padding: 26px 26px 24px;
+  border-radius: calc(20px - 2px);
+  background: var(--surface);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.rev-card-stars { color: var(--amber); font-size: 0.82rem; letter-spacing: 2px; margin-bottom: 14px; }
+.rev-quote {
+  font-size: 0.86rem;
+  line-height: 1.68;
+  color: var(--text-2);
+  flex: 1;
+  margin-bottom: 22px;
+}
+.rev-author { display: flex; align-items: center; gap: 12px; }
+.rev-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: linear-gradient(135deg, var(--indigo), var(--cyan));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.rev-author-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.rev-author-text strong { font-size: 0.82rem; font-weight: 600; }
+.rev-author-text span { font-size: 0.68rem; color: var(--text-3); }
+
+.rev-empty {
+  margin-top: 20px;
+  padding: 48px 32px;
+  border-radius: 20px;
+  border: 1px dashed var(--border-hi);
+  background: rgba(255,255,255,0.02);
+  text-align: center;
+}
+.rev-empty-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.rev-empty-body { font-size: 0.85rem; color: var(--text-2); line-height: 1.6; max-width: 420px; margin: 0 auto 22px; }
+
+/* ══════════════════════════════════════════════════
+   UI GLOW-UP  (layered polish — safe to revert as one block)
+══════════════════════════════════════════════════ */
+
+/* — text selection + scrollbar — */
+::selection { background: rgba(99,102,241,0.32); color: #fff; }
+html { scrollbar-width: thin; scrollbar-color: rgba(129,140,248,0.35) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(129,140,248,0.4), rgba(99,102,241,0.25));
+  border: 2px solid var(--bg);
+  border-radius: 100px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(129,140,248,0.6); }
+
+/* — keyboard focus rings (mouse users unaffected) — */
+:focus-visible {
+  outline: 2px solid var(--indigo-lt);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* — film grain over everything, very subtle — */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* — cards: gradient bezel, elevation + glow on hover — */
+.sys-card, .rev-card, .vstat {
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
+  transition: background .35s, box-shadow .4s cubic-bezier(.32,.72,0,1);
+}
+.sys-card:hover, .rev-card:hover {
+  background: linear-gradient(180deg, rgba(129,140,248,0.55), rgba(6,182,212,0.16));
+  box-shadow:
+    0 24px 55px -22px rgba(0,0,0,0.75),
+    0 0 34px -14px rgba(99,102,241,0.35);
+}
+.vstat:hover {
+  background: linear-gradient(180deg, rgba(129,140,248,0.4), rgba(255,255,255,0.05));
+  box-shadow: 0 20px 45px -22px rgba(0,0,0,0.7);
+}
+
+/* cursor-tracking glow inside cards */
+.sys-card-inner, .rev-card-inner { position: relative; }
+.sys-card-inner::after, .rev-card-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .35s;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 0%),
+    rgba(129,140,248,0.16), transparent 60%);
+}
+.sys-card:hover .sys-card-inner::after,
+.rev-card:hover .rev-card-inner::after { opacity: 1; }
+
+/* — stat numbers: indigo→cyan wash — */
+.vstat-num {
+  background: linear-gradient(135deg, #fff 10%, var(--indigo-lt) 60%, var(--cyan));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* — buttons: gradient fill, spring hover — */
+.btn-primary, .nav-btn {
+  background: linear-gradient(135deg, var(--indigo-lt) 0%, var(--indigo) 55%, #4f46e5 100%);
+  box-shadow: 0 10px 24px -10px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
+  transition: transform .3s cubic-bezier(.32,.72,0,1), box-shadow .3s, opacity .2s;
+}
+.btn-primary:hover, .nav-btn:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px -10px rgba(99,102,241,0.65), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+.btn-primary:active, .nav-btn:active { transform: translateY(0); }
+.btn-ghost {
+  transition: border-color .25s, color .25s, background .25s, transform .3s cubic-bezier(.32,.72,0,1);
+}
+.btn-ghost:hover {
+  border-color: var(--indigo-lt);
+  color: var(--text-1);
+  background: rgba(99,102,241,0.09);
+  transform: translateY(-2px);
+}
+
+/* — nav: firmer glass once scrolled past hero — */
+#nav { transition: background .3s, border-color .3s, box-shadow .3s; }
+#nav.scrolled {
+  background: rgba(5,5,8,0.9);
+  border-color: rgba(99,102,241,0.24);
+  box-shadow:
+    0 10px 34px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(99,102,241,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.09);
+}
+.nav-links a { position: relative; }
+.nav-links a:hover { color: var(--text-1); background: rgba(99,102,241,0.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sys-card, .rev-card, .vstat, .btn-primary, .nav-btn, .btn-ghost { transition: none; }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .s-wrap { padding: 0 24px; }
+  .explainer-inner, .vision-grid { grid-template-columns: 1fr; gap: 48px; }
+  .systems-grid { grid-template-columns: 1fr 1fr; }
+  .reviews-grid { grid-template-columns: 1fr 1fr; }
+  .rev-summary-actions { margin-left: 0; width: 100%; }
+  #nav { gap: 4px; }
+  .nav-links { display: none; }
+  footer { flex-direction: column; gap: 12px; }
+  .connect-divider { display: none; }
+}
+@media (max-width: 600px) {
+  .systems-grid { grid-template-columns: 1fr; }
+  .reviews-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+  #hero-driver { min-height: auto; }
+  #hero { position: static; height: auto; padding: 120px 0; }
+  #hero-video-wrap { display: none; }
+  #explainer-driver { height: auto; }
+  #explainer { position: static; height: auto; padding: 80px 0; }
+  .concept-card { position: static; opacity: 1; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ════════════════════════════════════════
+     FLOATING GLASS NAV
+════════════════════════════════════════ -->
+<div id="nav-wrapper">
+  <nav id="nav">
+    <div class="nav-logo">OPM <span>Ventures</span></div>
+    <ul class="nav-links">
+      <li><a href="#systems">Systems</a></li>
+      <li><a href="#vision">Mission</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#connect">Connect</a></li>
+    </ul>
+    <a href="mailto:shakur@opmventures.com" class="nav-btn">
+      Work With Us
+      <span class="nav-btn-icon">↗</span>
+    </a>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════════
+     HERO — Scroll-scrubbed Kling video
+════════════════════════════════════════ -->
+<div id="hero-driver">
+  <section id="hero">
+
+    <!-- Morphing blobs -->
+    <div class="blob blob-1" id="blob1"></div>
+    <div class="blob blob-2" id="blob2"></div>
+    <div class="blob blob-3" id="blob3"></div>
+
+    <!-- Cinematic canvas background (replace src with assets/hero-loop.mp4 after running generate-assets.mjs) -->
+    <div id="hero-video-wrap">
+      <canvas id="hero-canvas"></canvas>
+      <video
+        id="hero-video"
+        src="assets/hero-loop.mp4"
+        muted playsinline preload="auto"
+        style="display:none"
+      ></video>
+      <div class="hero-video-overlay"></div>
+    </div>
+
+    <!-- Grid lines -->
+    <div class="hero-grid"></div>
+
+    <!-- Content -->
+    <div class="hero-content">
+
+      <!-- Live status bar -->
+      <div class="hero-status" id="hero-status">
+        <div class="status-item">
+          <div class="live-dot"></div>
+          <span>Recon Agent — Active</span>
+        </div>
+        <div class="status-sep"></div>
+        <div class="status-item">
+          <div class="live-dot"></div>
+          <span>Comms Agent — Active</span>
+        </div>
+        <div class="status-sep"></div>
+        <div class="status-item">
+          <div class="live-dot amber"></div>
+          <span>Command — On Duty</span>
+        </div>
+      </div>
+
+      <div class="eyebrow" id="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        OPM Ventures LLC
+      </div>
+
+      <h1 class="hero-hed" id="hero-hed">
+        AI That Works<br>
+        <span class="accent">While You Serve</span>
+      </h1>
+
+      <p class="hero-sub" id="hero-sub">
+        Autonomous agents that generate leads, draft outreach, and dispatch tasks
+        around the clock — built by an operator who can't afford to stop.
+      </p>
+
+      <div class="hero-actions" id="hero-actions">
+        <a href="#systems" class="btn-primary">
+          See the System
+          <span class="btn-icon">→</span>
+        </a>
+        <a href="#connect" class="btn-ghost">Get In Touch</a>
+      </div>
+
+    </div>
+
+    <div id="hero-scroll">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════
+     TICKER
+════════════════════════════════════════ -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="ticker">
+    <span class="ticker-item">REMY OS v2.0 — Running</span>
+    <span class="ticker-item">Recon Agent — 3 Leads Found Today</span>
+    <span class="ticker-item">Comms Agent — Outreach Drafted</span>
+    <span class="ticker-item">Command Agent — Tasks Dispatched</span>
+    <span class="ticker-item">Daily Scan — 08:00 AM CT</span>
+    <span class="ticker-item">OPM Ventures — San Antonio TX</span>
+    <span class="ticker-item">Relive Realty — Licensed #844622-SA</span>
+    <span class="ticker-item">Autonomous Operations — 24/7</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item">REMY OS v2.0 — Running</span>
+    <span class="ticker-item">Recon Agent — 3 Leads Found Today</span>
+    <span class="ticker-item">Comms Agent — Outreach Drafted</span>
+    <span class="ticker-item">Command Agent — Tasks Dispatched</span>
+    <span class="ticker-item">Daily Scan — 08:00 AM CT</span>
+    <span class="ticker-item">OPM Ventures — San Antonio TX</span>
+    <span class="ticker-item">Relive Realty — Licensed #844622-SA</span>
+    <span class="ticker-item">Autonomous Operations — 24/7</span>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     EXPLAINER — pinned scroll, 4 concepts
+════════════════════════════════════════ -->
+<div id="explainer-driver">
+  <section id="explainer">
+    <div class="s-wrap">
+      <div class="explainer-inner">
+
+        <!-- Left: narrative text that changes -->
+        <div class="explainer-left">
+          <div class="exp-label" id="exp-label">// 01 — CONCEPT</div>
+          <h2 class="exp-hed" id="exp-hed">
+            What Is an<br><span class="g">AI Agent?</span>
+          </h2>
+          <p class="exp-body" id="exp-body">
+            An AI agent is a system that perceives its environment, makes decisions,
+            and takes actions to achieve a goal — without constant human input.
+            It's software that works like a team member who never sleeps.
+          </p>
+          <div class="exp-progress" id="exp-progress">
+            <div class="exp-dot active"></div>
+            <div class="exp-dot"></div>
+            <div class="exp-dot"></div>
+            <div class="exp-dot"></div>
+          </div>
+        </div>
+
+        <!-- Right: concept cards -->
+        <div class="concept-stack" id="concept-stack">
+
+          <div class="concept-card visible" id="cc-0">
+            <div class="dbl-bezel">
+              <div class="dbl-bezel-inner">
+                <div class="concept-num">// 01</div>
+                <div class="concept-icon">🧠</div>
+                <div class="concept-title">Perception</div>
+                <div class="concept-body">The agent reads signals from the world — market data, inboxes, lead sources — and understands what matters.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-card" id="cc-1">
+            <div class="dbl-bezel">
+              <div class="dbl-bezel-inner">
+                <div class="concept-num">// 02</div>
+                <div class="concept-icon">⚡</div>
+                <div class="concept-title">Decision</div>
+                <div class="concept-body">Given context and a goal, it decides the next best action. No manager required. No reminder needed.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-card" id="cc-2">
+            <div class="dbl-bezel">
+              <div class="dbl-bezel-inner">
+                <div class="concept-num">// 03</div>
+                <div class="concept-icon">🔁</div>
+                <div class="concept-title">Execution</div>
+                <div class="concept-body">It acts — drafts the message, routes the lead, fires the task — and loops back to check outcomes.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="concept-card" id="cc-3">
+            <div class="dbl-bezel">
+              <div class="dbl-bezel-inner">
+                <div class="concept-num">// 04</div>
+                <div class="concept-icon">📡</div>
+                <div class="concept-title">REMY OS</div>
+                <div class="concept-body">Three specialized agents — Recon, Comms, Command — operating in a coordinated pipeline. Built by an operator who can't be at a desk.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ════════════════════════════════════════
+     SYSTEMS — 6 projects
+════════════════════════════════════════ -->
+<section id="systems">
+  <div class="section-atmo" id="sys-atmo" aria-hidden="true"></div>
+  <div class="s-wrap">
+
+    <div class="eyebrow" id="sys-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Active Systems
+    </div>
+    <h2 class="section-hed" id="sys-hed">
+      Built to Operate.<br><span class="g">Not to Demo.</span>
+    </h2>
+    <p class="section-sub" id="sys-sub">Six real systems running in production — not side projects, not MVPs.</p>
+
+    <div class="systems-grid" id="systems-grid">
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">Autonomous AI <span class="live-badge">Live</span></div>
+          <div class="sys-icon">⚙️</div>
+          <div class="sys-title">REMY OS</div>
+          <div class="sys-body">Intelligent command dashboard powered by multi-agent AI. Runs lead gen, outreach, and task automation 24/7 — even while I'm on duty.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">FastAPI</span>
+            <span class="sys-tag">Next.js</span>
+            <span class="sys-tag">SQLite</span>
+            <span class="sys-tag">Port 3099</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">AI Agent</div>
+          <div class="sys-icon">🔍</div>
+          <div class="sys-title">Recon Agent</div>
+          <div class="sys-body">Scans markets and lead sources daily. Surfaces qualified opportunities and deposits them into the task queue automatically.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">Python</span>
+            <span class="sys-tag">Claude AI</span>
+            <span class="sys-tag">8AM Daily</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">AI Agent</div>
+          <div class="sys-icon">✉️</div>
+          <div class="sys-title">Comms Agent</div>
+          <div class="sys-body">Takes Recon's leads and drafts personalized outreach. Message tone, context, and call-to-action — no manual copy-writing.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">Claude AI</span>
+            <span class="sys-tag">Telegram</span>
+            <span class="sys-tag">Templates</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">Real Estate</div>
+          <div class="sys-icon">🏠</div>
+          <div class="sys-title">Relive Realty</div>
+          <div class="sys-body">Licensed real estate in San Antonio, TX. Military relocations, first-time buyers, and investment properties. #844622-SA.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">San Antonio</span>
+            <span class="sys-tag">Military PCS</span>
+            <span class="sys-tag">Investment</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">Logistics</div>
+          <div class="sys-icon">🚚</div>
+          <div class="sys-title">OPM Courier</div>
+          <div class="sys-body">Solo operator medical courier serving SA labs, law firms, and title companies. Dedicated vehicle, same-day routing.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">Medical</span>
+            <span class="sys-tag">Legal</span>
+            <span class="sys-tag">B2B</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sys-card">
+        <div class="sys-card-inner">
+          <div class="sys-cat">AI Agent</div>
+          <div class="sys-icon">⚖️</div>
+          <div class="sys-title">Legal Job Agent</div>
+          <div class="sys-body">Autonomous job-search agent. Scrapes boards, scores listings against criteria, and surfaces qualified matches without manual effort.</div>
+          <div class="sys-tags">
+            <span class="sys-tag">Python</span>
+            <span class="sys-tag">Web Scraping</span>
+            <span class="sys-tag">AI Scoring</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     VISION
+════════════════════════════════════════ -->
+<section id="vision">
+  <div class="section-atmo" id="vis-atmo" aria-hidden="true"></div>
+  <div class="vision-glow"></div>
+  <div class="s-wrap">
+
+    <div class="eyebrow" id="vis-eyebrow">
+      <span class="eyebrow-dot"></span>
+      The Mission
+    </div>
+
+    <div class="vision-grid">
+      <div>
+        <blockquote class="vision-quote" id="vis-quote">
+          "I built this while on duty.<br>
+          <em>It works while I'm at formation.</em><br>
+          That's the whole point."
+        </blockquote>
+        <div class="vision-attr" id="vis-attr">
+          <div class="vision-avatar" style="background:linear-gradient(135deg,#6366f1,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;font-family:'Geist',sans-serif;">SXR</div>
+          <div class="vision-attr-text">
+            <strong>Shakur X. Remy</strong>
+            <span>Founder, OPM Ventures LLC · Active Duty</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vision-stats" id="vis-stats">
+        <div class="vstat">
+          <div class="vstat-inner">
+            <div class="vstat-num">5+</div>
+            <div class="vstat-label">Years Service</div>
+          </div>
+        </div>
+        <div class="vstat">
+          <div class="vstat-inner">
+            <div class="vstat-num">24/7</div>
+            <div class="vstat-label">Autonomous Ops</div>
+          </div>
+        </div>
+        <div class="vstat">
+          <div class="vstat-inner">
+            <div class="vstat-num">3</div>
+            <div class="vstat-label">AI Agents Running</div>
+          </div>
+        </div>
+        <div class="vstat">
+          <div class="vstat-inner">
+            <div class="vstat-num">∞</div>
+            <div class="vstat-label">Ceiling</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     REVIEWS — populated by `npm run reviews`
+════════════════════════════════════════ -->
+<section id="reviews">
+  <div class="section-atmo" id="rev-atmo" aria-hidden="true"></div>
+  <div class="s-wrap">
+
+    <div class="eyebrow" id="rev-eyebrow">
+      <span class="eyebrow-dot"></span>
+      Client Reviews
+    </div>
+    <h2 class="section-hed" id="rev-hed">
+      Trusted by the<br><span class="g">people we serve.</span>
+    </h2>
+    <p class="section-sub" id="rev-sub">Verified reviews from our Google Business Profile.</p>
+
+    <!-- REVIEWS:START -->
+
+    <div class="rev-empty" id="rev-empty">
+      <div class="rev-empty-title">Be the first to review OPM Ventures</div>
+      <div class="rev-empty-body">
+        Worked with us on an AI system, a courier run, or a real estate move?
+        A 60-second Google review helps other operators find us.
+      </div>
+      <a href="https://www.google.com/maps/search/?api=1&query=OPM%20Ventures%20LLC" target="_blank" rel="noopener" class="btn-primary" id="rev-write">
+        Leave a Google Review
+        <span class="btn-icon">↗</span>
+      </a>
+    </div>
+    <!-- REVIEWS:END -->
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     CONNECT
+════════════════════════════════════════ -->
+<section id="connect">
+  <div class="section-atmo" id="conn-atmo" aria-hidden="true"></div>
+  <div class="connect-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="s-wrap">
+
+    <div class="eyebrow" id="conn-eyebrow" style="justify-content:center;">
+      <span class="eyebrow-dot"></span>
+      Get In Touch
+    </div>
+
+    <h2 class="connect-hed" id="conn-hed">
+      Ready to Build<br><span class="g">Something Real?</span>
+    </h2>
+
+    <p class="connect-sub" id="conn-sub">
+      Real estate, autonomous AI, or a system that doesn't exist yet.
+      If you're serious, I'm ready.
+    </p>
+
+    <div class="connect-actions" id="conn-actions">
+      <a href="mailto:shakur@opmventures.com" class="btn-primary">
+        Email Me
+        <span class="btn-icon">↗</span>
+      </a>
+      <a href="#systems" class="btn-ghost">View Systems</a>
+    </div>
+
+    <div class="connect-links" id="conn-links">
+      <div class="connect-item">
+        <span class="connect-item-label">Email</span>
+        <a href="mailto:shakur@opmventures.com" class="connect-item-value">shakur@opmventures.com</a>
+      </div>
+      <div class="connect-divider"></div>
+      <div class="connect-item">
+        <span class="connect-item-label">Real Estate · TX #844622-SA</span>
+        <span class="connect-item-value">Relive Realty · San Antonio</span>
+      </div>
+      <div class="connect-divider"></div>
+      <div class="connect-item">
+        <span class="connect-item-label">Company</span>
+        <span class="connect-item-value">OPM Ventures LLC</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <span>© 2025 OPM Ventures LLC · Shakur X. Remy</span>
+  <div class="footer-links">
+    <a href="mailto:shakur@opmventures.com">Email</a>
+    <a href="#systems">Systems</a>
+    <a href="#vision">Mission</a>
+    <a href="#reviews">Reviews</a>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
+<script>
+// ── GSAP + CustomEase ────────────────────────────────
+gsap.registerPlugin(ScrollTrigger, CustomEase);
+CustomEase.create('reveal', '0.5,0,0,1');
+CustomEase.create('cinema', '0.76,0,0.24,1');
+
+// ── LENIS smooth scroll ──────────────────────────────
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  smoothWheel: true
+});
+lenis.on('scroll', ScrollTrigger.update);
+gsap.ticker.add(time => lenis.raf(time * 1000));
+gsap.ticker.lagSmoothing(0);
+
+// ── CURSOR ───────────────────────────────────────────
+const cur   = document.getElementById('cursor');
+const cring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+window.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  gsap.set(cur, { x: mx, y: my });
+});
+(function loopCursor() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  gsap.set(cring, { x: rx, y: ry });
+  requestAnimationFrame(loopCursor);
+})();
+document.querySelectorAll('a, button, .sys-card, .concept-card, .rev-card').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+
+// ── UI GLOW-UP: nav firms up on scroll + cards get a cursor-tracked glow ──
+const navEl = document.getElementById('nav');
+const setNavScrolled = () => navEl && navEl.classList.toggle('scrolled', window.scrollY > 40);
+lenis.on('scroll', setNavScrolled);
+window.addEventListener('scroll', setNavScrolled, { passive: true });
+setNavScrolled();
+
+document.querySelectorAll('.sys-card, .rev-card').forEach(card => {
+  const inner = card.querySelector('.sys-card-inner, .rev-card-inner');
+  if (!inner) return;
+  card.addEventListener('pointermove', e => {
+    const r = card.getBoundingClientRect();
+    inner.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    inner.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+  });
+});
+
+// ── MORPHING BLOBS ───────────────────────────────────
+gsap.to('#blob1', {
+  borderRadius: '62% 38% 55% 45% / 48% 62% 38% 52%',
+  x: 40, y: 20,
+  duration: 9, ease: 'sine.inOut', yoyo: true, repeat: -1
+});
+gsap.to('#blob2', {
+  borderRadius: '45% 55% 38% 62% / 55% 45% 62% 38%',
+  x: -30, y: -20,
+  duration: 11, ease: 'sine.inOut', yoyo: true, repeat: -1
+});
+gsap.to('#blob3', {
+  borderRadius: '55% 45% 60% 40% / 42% 58% 42% 58%',
+  scale: 1.15,
+  duration: 7, ease: 'sine.inOut', yoyo: true, repeat: -1
+});
+
+// ── HERO CANVAS — cinematic particle field (active until Kling video ready) ──
+(function initHeroCanvas() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Neural network nodes
+  const nodes = Array.from({ length: 60 }, () => ({
+    x: Math.random(), y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.0003,
+    vy: (Math.random() - 0.5) * 0.0003,
+    r: 1 + Math.random() * 2,
+    color: Math.random() > 0.6 ? '#6366f1' : Math.random() > 0.5 ? '#06b6d4' : '#a78bfa'
+  }));
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw edges between close nodes
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = (nodes[i].x - nodes[j].x) * canvas.width;
+        const dy = (nodes[i].y - nodes[j].y) * canvas.height;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 160) {
+          ctx.globalAlpha = (1 - dist / 160) * 0.18;
+          ctx.strokeStyle = nodes[i].color;
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x * canvas.width, nodes[i].y * canvas.height);
+          ctx.lineTo(nodes[j].x * canvas.width, nodes[j].y * canvas.height);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw nodes
+    nodes.forEach(n => {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0) n.x = 1; if (n.x > 1) n.x = 0;
+      if (n.y < 0) n.y = 1; if (n.y > 1) n.y = 0;
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = n.color;
+      ctx.beginPath();
+      ctx.arc(n.x * canvas.width, n.y * canvas.height, n.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+  draw(0);
+})();
+
+// ── SCROLL-SCRUBBED HERO VIDEO (kling-motion-web-p pattern) ──
+// Activates automatically once assets/hero-loop.mp4 exists (after generate-assets.mjs)
+const heroVideo  = document.getElementById('hero-video');
+const heroDriver = document.getElementById('hero-driver');
+const heroWrap   = document.getElementById('hero-video-wrap');
+const heroCanvas = document.getElementById('hero-canvas');
+
+heroVideo.pause();
+
+heroVideo.addEventListener('loadedmetadata', () => {
+  // Video loaded — show it, hide canvas
+  heroVideo.style.display = 'block';
+  if (heroCanvas) heroCanvas.style.display = 'none';
+  updateVideo();
+});
+
+let videoTicking = false;
+function updateVideo() {
+  if (videoTicking) return;
+  videoTicking = true;
+  requestAnimationFrame(() => {
+    const rect = heroDriver.getBoundingClientRect();
+    const total = heroDriver.offsetHeight - window.innerHeight;
+    const scrolled = -rect.top;
+    const p = Math.max(0, Math.min(1, scrolled / total));
+    if (heroVideo.duration) heroVideo.currentTime = p * heroVideo.duration;
+    gsap.set(heroWrap, { opacity: p > 0.02 ? Math.min(p * 4, 1) : 0 });
+    videoTicking = false;
+  });
+}
+lenis.on('scroll', updateVideo);
+
+// ── NAV entrance ─────────────────────────────────────
+gsap.to('#nav', { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.4 });
+
+// ── HERO entrance ────────────────────────────────────
+const heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+heroTl
+  .fromTo('#hero-status',  { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 0.5)
+  .fromTo('#hero-eyebrow', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7 }, 0.65)
+  .fromTo('#hero-hed',     { opacity: 0, y: 48, filter: 'blur(12px)' }, { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.95 }, 0.8)
+  .fromTo('#hero-sub',     { opacity: 0, y: 28, filter: 'blur(6px)' },  { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.8 }, 1.1)
+  .fromTo('#hero-actions', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7 }, 1.3)
+  .fromTo('#hero-scroll',  { opacity: 0 },        { opacity: 1, duration: 0.6 }, 1.7);
+
+// ── EXPLAINER — pinned scroll concepts ───────────────
+const concepts = [
+  {
+    label: '// 01 — CONCEPT',
+    hed:   'What Is an<br><span class="g">AI Agent?</span>',
+    body:  'An AI agent is a system that perceives its environment, makes decisions, and takes actions to achieve a goal — without constant human input. It\'s software that works like a team member who never sleeps.'
+  },
+  {
+    label: '// 02 — HOW IT WORKS',
+    hed:   'Three Agents.<br><span class="g">One Pipeline.</span>',
+    body:  'Recon finds the leads. Comms drafts the outreach. Command routes and dispatches. Each agent specializes so the system compounds instead of bottlenecking.'
+  },
+  {
+    label: '// 03 — THE RESULT',
+    hed:   'Leads While<br><span class="g">You Sleep.</span>',
+    body:  'The daily scheduler fires at 8 AM. Recon runs its scan. Comms drafts the messages. Command logs the tasks. By the time you check your phone, the work is done.'
+  },
+  {
+    label: '// 04 — THE VISION',
+    hed:   'Built for<br><span class="g">Operators.</span>',
+    body:  'REMY OS was built because military schedules don\'t accommodate business hours. If your time is genuinely limited, autonomous systems aren\'t a luxury — they\'re the only way to compete.'
+  }
+];
+
+const expLabel    = document.getElementById('exp-label');
+const expHed      = document.getElementById('exp-hed');
+const expBody     = document.getElementById('exp-body');
+const expDots     = document.querySelectorAll('.exp-dot');
+const conceptCards = document.querySelectorAll('.concept-card');
+let currentConcept = 0;
+
+function setConcept(idx) {
+  if (idx === currentConcept) return;
+  const dir = idx > currentConcept ? 1 : -1;
+
+  // Out
+  gsap.to([expLabel, expHed, expBody], {
+    opacity: 0, y: dir * -20, filter: 'blur(6px)',
+    duration: 0.28, ease: 'power2.in', stagger: 0.04
+  });
+  gsap.to(`#cc-${currentConcept}`, {
+    opacity: 0, y: dir * -20, scale: 0.97, duration: 0.28, ease: 'power2.in',
+    onComplete: () => conceptCards[currentConcept].classList.remove('visible')
+  });
+
+  // In
+  const c = concepts[idx];
+  gsap.delayedCall(0.26, () => {
+    expLabel.textContent = c.label;
+    expHed.innerHTML     = c.hed;
+    expBody.textContent  = c.body;
+    gsap.fromTo([expLabel, expHed, expBody],
+      { opacity: 0, y: dir * 20, filter: 'blur(6px)' },
+      { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.5, ease: 'reveal', stagger: 0.06 }
+    );
+    conceptCards[idx].classList.add('visible');
+    gsap.fromTo(`#cc-${idx}`,
+      { opacity: 0, y: dir * 20, scale: 0.97 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: 'reveal' }
+    );
+    expDots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    currentConcept = idx;
+  });
+}
+
+ScrollTrigger.create({
+  trigger: '#explainer-driver',
+  start: 'top top',
+  end: 'bottom bottom',
+  scrub: false,
+  onUpdate(self) {
+    const idx = Math.min(concepts.length - 1, Math.floor(self.progress * concepts.length));
+    setConcept(idx);
+  }
+});
+
+// ── SECTION REVEALS — all use blur + y entrance ───────
+const revealConfig = { opacity: 0, y: 48, filter: 'blur(8px)' };
+const revealTo     = { opacity: 1, y: 0, filter: 'blur(0px)', duration: 0.85, ease: 'power3.out' };
+const ST           = (el, s = 'top 82%') => ({ trigger: el, start: s });
+
+// Systems
+gsap.from('#sys-eyebrow', { ...revealConfig, duration: 0.7, scrollTrigger: ST('#systems') });
+gsap.from('#sys-hed',     { ...revealConfig, scrollTrigger: ST('#systems', 'top 78%') });
+gsap.from('#sys-sub',     { ...revealConfig, duration: 0.7, scrollTrigger: ST('#systems', 'top 76%') });
+gsap.from('#systems-grid .sys-card', {
+  ...revealConfig, stagger: 0.08, duration: 0.7,
+  scrollTrigger: ST('#systems-grid', 'top 84%')
+});
+
+// Vision
+gsap.from('#vis-eyebrow', { ...revealConfig, duration: 0.7, scrollTrigger: ST('#vision') });
+gsap.from('#vis-quote',   { ...revealConfig, scrollTrigger: ST('#vision', 'top 78%') });
+gsap.from('#vis-attr',    { ...revealConfig, duration: 0.7, scrollTrigger: ST('#vis-attr', 'top 82%') });
+// Reviews
+gsap.from('#rev-eyebrow', { ...revealConfig, duration: 0.7, scrollTrigger: ST('#reviews') });
+gsap.from('#rev-hed',     { ...revealConfig, scrollTrigger: ST('#reviews', 'top 78%') });
+gsap.from('#rev-sub',     { ...revealConfig, duration: 0.7, scrollTrigger: ST('#reviews', 'top 76%') });
+if (document.querySelector('#reviews .rev-summary')) {
+  gsap.from('#reviews .rev-summary', { ...revealConfig, duration: 0.7, scrollTrigger: ST('#reviews', 'top 74%') });
+}
+if (document.querySelector('#reviews-grid .rev-card')) {
+  gsap.from('#reviews-grid .rev-card', {
+    ...revealConfig, stagger: 0.08, duration: 0.7,
+    scrollTrigger: ST('#reviews-grid', 'top 84%')
+  });
+}
+if (document.querySelector('#rev-empty')) {
+  gsap.from('#rev-empty', { ...revealConfig, duration: 0.7, scrollTrigger: ST('#reviews', 'top 74%') });
+}
+
+gsap.from('#vis-stats .vstat', {
+  ...revealConfig, stagger: 0.1, duration: 0.7,
+  scrollTrigger: ST('#vis-stats', 'top 82%')
+});
+
+// Connect
+gsap.from(['#conn-eyebrow','#conn-hed','#conn-sub','#conn-actions','#conn-links'], {
+  ...revealConfig, stagger: 0.08, duration: 0.7,
+  scrollTrigger: ST('#connect')
+});
+
+gsap.from('footer', { opacity: 0, duration: 0.6, scrollTrigger: ST('footer', 'top 96%') });
+
+// ══════════════════════════════════════════════════════════════════
+//  GTA VI PARALLAX SYSTEM
+//  Rule: far layers move LESS than near layers.
+//  Content always scrolls at 100% (reference).
+//  Background orbs/canvas scroll at 10–30% (appear far away).
+//  Grid / mid elements at 40–60%. Creates cinematic depth.
+// ══════════════════════════════════════════════════════════════════
+
+// ── HERO DEPTH LAYERS ────────────────────────────────────────────────────────
+// Hero is position:sticky inside 280svh driver.
+// As scroll moves through the driver (progress 0→1) we translate the internal
+// layers at different speeds — background drifts slower, creating 3D depth.
+
+// Far layer: canvas (neural network) — slowest + slight scale zoom
+gsap.to('#hero-canvas', {
+  y: () => window.innerHeight * -0.18,
+  scale: 1.12,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// Mid-far layer: blob 1 (upper left) — drifts up + left
+gsap.to('#blob1', {
+  y: () => window.innerHeight * -0.24,
+  x: 60,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// Mid-far layer: blob 2 (lower right) — drifts up + right
+gsap.to('#blob2', {
+  y: () => window.innerHeight * -0.30,
+  x: -50,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// Mid layer: blob 3 (centre) — slowest vertical movement
+gsap.to('#blob3', {
+  y: () => window.innerHeight * -0.14,
+  scale: 1.08,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// Near-background layer: tech grid — faster than canvas, slower than content
+gsap.to('.hero-grid', {
+  y: () => window.innerHeight * -0.38,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// Hero content — barely moves (it's the foreground reference anchor)
+// Small upward float gives subtle "pulling through" camera feel
+gsap.to('.hero-content', {
+  y: () => window.innerHeight * -0.05,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#hero-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// ── SECTION ATMOSPHERIC PARALLAX ─────────────────────────────────────────────
+// Each section's background orb moves at ~40-55% of the section's scroll height.
+// Section content (headings, cards) moves at 100% = appears to float above the
+// slowly-drifting background. Classic GTA VI depth layering.
+
+gsap.to('#sys-atmo', {
+  yPercent: -45,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#systems',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+// Section cards get a VERY subtle parallax so they feel layered vs the heading
+gsap.to('#systems-grid', {
+  yPercent: -4,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#systems',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+// Vision section
+gsap.to('#vis-atmo', {
+  yPercent: -40,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#vision',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+gsap.to('.vision-glow', {
+  yPercent: -70,
+  scale: 1.3,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#vision',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+// Connect section
+gsap.to('#conn-atmo', {
+  yPercent: -50,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#connect',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+// Connect orbs parallax at different rates = layered depth
+gsap.to('.orb-1', {
+  yPercent: -35,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#connect',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+gsap.to('.orb-2', {
+  yPercent: -55,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#connect',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+gsap.to('.orb-3', {
+  yPercent: -45,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#connect',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+
+// ── EXPLAINER SECTION DEPTH ───────────────────────────────────────────────────
+// The concept card stack drifts at a different rate than the text narration
+// — card stack moves slightly slower = floats behind the text layer
+gsap.to('#concept-stack', {
+  y: () => window.innerHeight * 0.08,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '#explainer-driver',
+    start: 'top top',
+    end: 'bottom bottom',
+    scrub: true,
+    invalidateOnRefresh: true
+  }
+});
+
+// ── TICKER PARALLAX ────────────────────────────────────────────────────────
+// Ticker moves slightly faster than page (near layer = more movement)
+gsap.to('.ticker-wrap', {
+  yPercent: -8,
+  ease: 'none',
+  scrollTrigger: {
+    trigger: '.ticker-wrap',
+    start: 'top bottom',
+    end: 'bottom top',
+    scrub: true
+  }
+});
+</script>
+
+</body>
+</html>

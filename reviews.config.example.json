@@ -1,0 +1,6 @@
+{
+  "apiKey": "PASTE_GOOGLE_CLOUD_API_KEY",
+  "placeId": "PASTE_GOOGLE_PLACE_ID",
+  "maxReviews": 6,
+  "minRating": 4
+}
