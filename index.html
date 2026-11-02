@@ -6,18 +6,32 @@
 <title>OPM Ventures — AI That Works While You Serve</title>
 <meta name="description" content="Autonomous AI systems for operators who can't afford to stop. Built by Shakur Remy, active duty military, AI founder.">
 
+<!-- Security headers that CAN be set from a static page (no server to configure
+     on GitHub Pages). CSP here can't carry frame-ancestors — that directive is
+     spec'd to be ignored outside a real HTTP header — so clickjacking defense
+     (X-Frame-Options / frame-ancestors) and HSTS still need either a host that
+     supports custom response headers or a reverse proxy (e.g. Cloudflare) in
+     front of Pages. script-src/style-src are pinned to the exact origins this
+     page actually loads from (see the <script>/<link> tags below + Google Fonts'
+     stylesheet, which itself only ever points at fonts.gstatic.com). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
 <!-- Fonts: Geist (dashboard/status texture) + Fraunces (cinematic headline moments) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 
-<!-- GSAP 3.13 -->
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/CustomEase.min.js"></script>
+<!-- GSAP 3.13 — pinned via SRI so a compromised/MITM'd jsdelivr response can't
+     silently swap in different code; the hash is tied to this exact version,
+     so bumping the CDN version requires regenerating it (see README or ask
+     Claude to recompute: curl the file, `openssl dgst -sha384 -binary | openssl base64 -A`). -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/gsap.min.js" integrity="sha384-HOvlOYPIs/zjoIkWUGXkVmXsjr8GuZLV+Q+rcPwmJOVZVpvTSXQChiN4t9Euv9Vc" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/ScrollTrigger.min.js" integrity="sha384-P8VzCVnT9NBUkMrpcIZrJbA7EBjJvh/fJS6PmP+4nLIM284DtsImIv8D0fFjIkeh" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13/dist/CustomEase.min.js" integrity="sha384-JCMGAgtMgo/19ttIm8BSnUFxOA5KAxaKT7jZdTDtaL0df8+CHKRo9XFCmhsvUlXG" crossorigin="anonymous"></script>
 
 <!-- Lenis smooth scroll -->
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js" integrity="sha384-O55L/6rhHr9CFvrxqv5luxOCcmVaBmETbZbJDP+Do8T0pztTACsFBD/IXCNkj7DV" crossorigin="anonymous"></script>
 
 <style>
 /* ══════════════════════════════════════════════════
@@ -40,17 +54,20 @@ img, video { display: block; max-width: 100%; }
    from the sibling site's champagne/brass palette
 ══════════════════════════════════════════════════ */
 :root {
-  --bg:        #0a0a0c;
-  --surface:   #131316;
-  --surface-2: #18181c;
+  --bg:        #06080d;
+  --surface:   #10141c;
+  --surface-2: #151a24;
   --border:    rgba(255,255,255,0.07);
   --border-hi: rgba(255,255,255,0.13);
 
-  --indigo:    #d17a42;   /* "ember" — kept var name for a minimal diff, warm now */
-  --indigo-lt: #e69a66;   /* "ember-lt" */
-  --cyan:      #3f8f8a;   /* "teal" — secondary/data accent */
-  --violet:    #3f8f8a;
-  --amber:     #f2a950;
+  /* 2026-09-18: cool night-flight palette — replaces the warm ember/teal
+     theme to match the new aerial city footage. Var names kept as-is
+     (indigo/cyan/etc) to minimize diff across the file; values are new. */
+  --indigo:    #3b82f6;   /* electric night-city blue */
+  --indigo-lt: #60a5fa;
+  --cyan:      #22d3ee;   /* bright cyan — data/accent */
+  --violet:    #818cf8;
+  --amber:     #38bdf8;
   --green:     #10b981;
 
   --font-display: 'Fraunces', Georgia, serif;
@@ -84,29 +101,49 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(209,1
 /* ══════════════════════════════════════════════════
    FLOATING GLASS NAV
 ══════════════════════════════════════════════════ */
-#nav-wrapper {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  padding-top: 20px;
-  pointer-events: none;
-}
+/* #nav lives INSIDE #world (a direct child of the .df-root LiquidGlass
+   stage — see the LiquidGlass init near the bottom of the SCRIPTS block)
+   so the real WebGL glass shader can see the flight canvas behind it.
+   It keeps its own position:fixed centering since it no longer has a
+   flex-centering #nav-wrapper parent. */
 #nav {
+  position: fixed;
+  top: 20px; left: 50%;
+  transform: translateX(-50%) translateY(-12px);
+  z-index: 100;
   pointer-events: auto;
   display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px 8px 8px 24px;
   border-radius: 100px;
+  border: 1px solid var(--border-hi);
+  opacity: 0;
+  /* Baseline translucent look — the real WebGL LiquidGlass canvas (see
+     the module script near the bottom of the page) paints over this once
+     it initializes. This stays as the visible fallback on touch/narrow
+     viewports (skipped there on purpose) and for the brief moment before
+     the shader comes online. */
   background: rgba(5,5,8,0.72);
   backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid var(--border-hi);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
   box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  opacity: 0;
-  transform: translateY(-12px);
 }
+#nav.lg-active {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+/* The flight engine (mountDesktopFlight) builds its own internal brand +
+   nav + CTA bar (.df-bar) — it was always fully covered by #nav's opaque
+   background, so it rendered but was invisible/inert. Now that #nav uses
+   real WebGL refraction (genuinely translucent), .df-bar's scene-scrubber
+   labels would show through and clash with #nav's page links. It was
+   never meant to be seen, so hide it outright. injectDFCSS() appends its
+   <style> to <head> at runtime, after this stylesheet, so !important is
+   needed to win the cascade regardless of injection order. */
+.df-bar { display: none !important; }
 .nav-logo {
   font-size: 0.82rem;
   font-weight: 700;
@@ -374,6 +411,7 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(209,1
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
   margin-top: 64px;
+  perspective: 1200px;
 }
 .sys-card {
   padding: 2px;
@@ -382,6 +420,8 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(209,1
   border: 1px solid var(--border);
   transition: border-color .3s;
   cursor: none;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 .sys-card:hover { border-color: rgba(209,122,66,0.3); }
 .sys-card-inner {
@@ -619,6 +659,42 @@ body.hovering #cursor-ring { width: 44px; height: 44px; border-color: rgba(209,1
   background: rgba(63,143,138,0.1);
   bottom: -60px; left: 80px;
 }
+
+/* Animated background beams — thin light streaks drifting across the
+   section, Aceternity "Background Beams" pattern adapted to vanilla CSS.
+   Purely decorative (aria-hidden), sits behind .s-wrap content (z-index 0). */
+.connect-beams {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.beam {
+  position: absolute;
+  width: 1px;
+  height: 160%;
+  top: -30%;
+  background: linear-gradient(180deg, transparent, rgba(230,154,102,0.5) 45%, rgba(63,143,138,0.35) 55%, transparent);
+  opacity: 0;
+  transform: rotate(14deg) translateX(0);
+  animation: beam-drift 11s ease-in-out infinite;
+}
+.beam-1 { left: 8%;  animation-delay: 0s;   }
+.beam-2 { left: 26%; animation-delay: 2.1s; }
+.beam-3 { left: 48%; animation-delay: 4.3s; }
+.beam-4 { left: 68%; animation-delay: 1.4s; }
+.beam-5 { left: 88%; animation-delay: 3.6s; }
+@keyframes beam-drift {
+  0%   { opacity: 0;    transform: rotate(14deg) translateX(-40px); }
+  15%  { opacity: 0.55; }
+  50%  { opacity: 0.85; transform: rotate(14deg) translateX(20px); }
+  85%  { opacity: 0.4;  }
+  100% { opacity: 0;    transform: rotate(14deg) translateX(60px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beam { animation: none; opacity: 0.25; }
+}
 .connect-hed {
   font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 5.5rem);
@@ -715,6 +791,10 @@ footer {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   margin: 80px 0;
+  /* Magic UI-style marquee edge fade — content dissolves into the section
+     background instead of hard-cutting at the viewport edge. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 .ticker-inner {
   display: flex;
@@ -725,9 +805,18 @@ footer {
   font-size: 0.68rem;
   color: var(--text-3);
   letter-spacing: 0.04em;
+  transition: animation-play-state .2s;
 }
-.ticker-item { display: inline-flex; align-items: center; gap: 10px; }
+.ticker-wrap:hover .ticker-inner { animation-play-state: paused; }
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: color .2s;
+}
+.ticker-item:hover { color: var(--indigo-lt); }
 .ticker-item::before { content: '//'; color: var(--indigo); opacity: 0.5; }
+@media (prefers-reduced-motion: reduce) {
+  .ticker-inner { animation: none; }
+}
 @keyframes ticker {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
@@ -944,7 +1033,7 @@ body::after {
 
 /* — buttons: gradient fill, spring hover — */
 .btn-primary, .nav-btn {
-  background: linear-gradient(135deg, var(--indigo-lt) 0%, var(--indigo) 55%, #b85f2e 100%);
+  background: linear-gradient(135deg, var(--indigo-lt) 0%, var(--indigo) 55%, #1d4ed8 100%);
   box-shadow: 0 10px 24px -10px rgba(209,122,66,0.55), inset 0 1px 0 rgba(255,255,255,0.25);
   transition: transform .3s cubic-bezier(.32,.72,0,1), box-shadow .3s, opacity .2s;
 }
@@ -964,22 +1053,52 @@ body::after {
   transform: translateY(-2px);
 }
 
-/* — nav: firmer glass once scrolled past hero — */
-#nav { transition: background .3s, border-color .3s, box-shadow .3s; }
-#nav.scrolled {
-  background: rgba(5,5,8,0.9);
-  border-color: rgba(209,122,66,0.24);
-  box-shadow:
-    0 10px 34px rgba(0,0,0,0.55),
-    0 0 0 1px rgba(209,122,66,0.08),
-    inset 0 1px 0 rgba(255,255,255,0.09);
-}
 .nav-links a { position: relative; }
 .nav-links a:hover { color: var(--text-1); background: rgba(209,122,66,0.12); }
 
 @media (prefers-reduced-motion: reduce) {
   .sys-card, .rev-card, .vstat, .btn-primary, .nav-btn, .btn-ghost { transition: none; }
 }
+
+/* ══════════════════════════════════════════════════
+   LIQUID GLASS — OS-material pass (2026-11-01)
+   Pushes the nav + pill buttons to the same translucent,
+   cursor-lit specular language already used on the cards
+   (--mx/--my), closer to the iOS/visionOS "Liquid Glass"
+   control material: stronger blur/saturate, an inset
+   bevel (bright top edge, dark bottom edge), and a soft
+   highlight that follows the pointer.
+══════════════════════════════════════════════════ */
+.btn-primary, .nav-btn, .btn-ghost { position: relative; }
+.btn-ghost {
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.18);
+}
+.sys-card-inner, .rev-card-inner {
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+/* pointer-lit sheen — sits above each surface's own background/blur
+   but behind its text/icons (negative z-index, positive stacking ctx) */
+.btn-primary::before, .nav-btn::before, .btn-ghost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s;
+  background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 0%), rgba(255,255,255,0.35), transparent 60%);
+}
+.btn-primary:hover::before, .nav-btn:hover::before, .btn-ghost:hover::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary::before, .nav-btn::before, .btn-ghost::before { display: none; }
+}
+/* #nav direct children sit above the injected LiquidGlass <canvas> */
+#nav > * { position: relative; z-index: 1; }
 
 /* ══════════════════════════════════════════════════
    RESPONSIVE
@@ -1013,9 +1132,22 @@ body::after {
 <div id="cursor-ring"></div>
 
 <!-- ════════════════════════════════════════
-     FLOATING GLASS NAV
+     HERO — scroll-locked video hero (single <video> scrubbed via
+     currentTime against scroll position)
+     (mountScrollWorld builds its own DOM into #world — see config near
+     the bottom of the SCRIPTS block. Chrome ported from cinematic-scroll-template
+     / shakur-remy-site's proven engine.)
+
+     FLOATING GLASS NAV — #nav lives INSIDE #world (not a separate
+     #nav-wrapper sibling) so it's a direct child of the .df-root stage
+     that mountDesktopFlight builds there. That makes it eligible as a
+     LiquidGlass glassElement with #world as the root: the real WebGL
+     shader refracts the flight background (.df-bg) that's also a direct
+     child of #world. See the LiquidGlass init near the bottom of the
+     SCRIPTS block. #nav keeps its own position:fixed centering (see
+     CSS) since it no longer has a flex-centering wrapper parent.
 ════════════════════════════════════════ -->
-<div id="nav-wrapper">
+<div id="world">
   <nav id="nav">
     <div class="nav-logo">OPM <span>Ventures</span></div>
     <ul class="nav-links">
@@ -1030,14 +1162,6 @@ body::after {
     </a>
   </nav>
 </div>
-
-<!-- ════════════════════════════════════════
-     HERO — scroll-scrubbed canvas frame-sequence flight
-     (mountScrollWorld builds its own DOM into #world — see config near
-     the bottom of the SCRIPTS block. Ported from cinematic-scroll-template
-     / shakur-remy-site's proven engine.)
-════════════════════════════════════════ -->
-<div id="world"></div>
 
 <!-- ════════════════════════════════════════
      TICKER
@@ -1278,7 +1402,7 @@ body::after {
           That's the whole point."
         </blockquote>
         <div class="vision-attr" id="vis-attr">
-          <div class="vision-avatar" style="background:linear-gradient(135deg,#d17a42,#3f8f8a);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;font-family:'Geist',sans-serif;">SXR</div>
+          <div class="vision-avatar" style="background:linear-gradient(135deg,#3b82f6,#22d3ee);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;font-family:'Geist',sans-serif;">SXR</div>
           <div class="vision-attr-text">
             <strong>Shakur X. Remy</strong>
             <span>Founder, OPM Ventures LLC · Active Duty</span>
@@ -1361,6 +1485,13 @@ body::after {
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
   </div>
+  <div class="connect-beams" aria-hidden="true">
+    <span class="beam beam-1"></span>
+    <span class="beam beam-2"></span>
+    <span class="beam beam-3"></span>
+    <span class="beam beam-4"></span>
+    <span class="beam beam-5"></span>
+  </div>
 
   <div class="s-wrap">
 
@@ -1436,12 +1567,13 @@ gsap.ticker.add(time => lenis.raf(time * 1000));
 gsap.ticker.lagSmoothing(0);
 
 /* ════════════════════════════════════════════════════════════════════════
-   SCROLL WORLD — ported verbatim from cinematic-scroll-template /
-   shakur-remy-site's proven engine (mountDesktopFlight / mountMobileStory /
-   mountScrollWorld, the frameCount-driven canvas path — NOT the legacy
-   sw-* video-segment fallback, which is dropped here since it's unreachable
-   once frameCount is set). "Don't touch" block — edit the config call
-   further down instead of this code.
+   SCROLL WORLD — the hero chrome (nav bar, progress, per-section copy
+   reveal, route dots, accent color lerp) is the proven engine ported from
+   cinematic-scroll-template; the background itself is a single <video>
+   scrubbed via currentTime against scroll position, object-fit: cover
+   doing the desktop/mobile framing instead of separate frame sets.
+   "Don't touch" block — edit the config call further down instead of
+   this code.
 
    Lenis coexistence note: Lenis (default, non-`wrapper` mode) smooths the
    REAL window.scrollY and still dispatches native `scroll` events on every
@@ -1454,113 +1586,6 @@ gsap.ticker.lagSmoothing(0);
    that the flight doesn't feel laggy/rubbery under fast scroll, and lower
    `chase` (near the bottom config) if it does.
    ════════════════════════════════════════════════════════════════════════ */
-function mountMobileStory(container, config) {
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const S = config.sections || [];
-  if (!S.length) return;
-  const N = S.length;
-  injectMobileCSS();
-  container.classList.add('mv2-root');
-  try { document.documentElement.style.scrollSnapType = 'y proximity'; } catch (e) {}
-
-  const ids = S.map((s, i) => s.id || ('s' + (i + 1)));
-  const kinetic = t => '<span class="mv2-kt">' + String(t).split(' ')
-    .map(w => '<span class="mv2-kt__w"><span class="mv2-kt__i">' + msesc(w) + '</span></span>').join(' ') + '</span>';
-
-  const bar = mel('div', 'mv2-bar');
-  const brand = mel('a', 'mv2-brand'); brand.href = '#top';
-  if (config.brand && config.brand.logo) { const lg = mel('img', 'mv2-brand__logo'); lg.src = config.brand.logo; lg.alt = config.brand.name || ''; brand.appendChild(lg); }
-  const bn = mel('span', 'mv2-brand__name'); bn.textContent = (config.brand && config.brand.name) || ''; brand.appendChild(bn);
-  bar.appendChild(brand);
-  const menuBtn = mel('button', 'mv2-menu-btn'); menuBtn.setAttribute('aria-label', 'Menu'); menuBtn.innerHTML = '<i></i><i></i><i></i>';
-  bar.appendChild(menuBtn);
-  const menu = mel('nav', 'mv2-menu');
-  const links = S.map((s, i) => ({ href: '#' + ids[i], label: s.label || ('0' + (i + 1)) }))
-    .concat([{ href: '#systems', label: 'Systems' }, { href: '#vision', label: 'Mission' }, { href: '#connect', label: 'Connect' }]);
-  menu.innerHTML = links.map(l => '<a href="' + l.href + '">' + msesc(l.label) + '</a>').join('');
-  const closeMenu = () => document.body.classList.remove('mv2-menu-open');
-  menuBtn.addEventListener('click', () => document.body.classList.toggle('mv2-menu-open'));
-  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
-  container.appendChild(bar); container.appendChild(menu);
-
-  const rail = mel('div', 'mv2-rail');
-  const dots = S.map(() => { const d = mel('i'); rail.appendChild(d); return d; });
-  container.appendChild(rail);
-
-  const panels = S.map((s, i) => {
-    const sec = mel('section', 'mv2-panel' + (i === 0 ? ' mv2-panel--hero' : '') + (i === N - 1 ? ' mv2-panel--last' : ''));
-    sec.id = ids[i];
-    sec.style.setProperty('--mv2-accent', s.accent || '#d17a42');
-    const bg = mel('div', 'mv2-panel__bg');
-    const img = mel('img', 'mv2-panel__img');
-    img.src = s.stillMobile && i === 0 ? s.stillMobile : (s.still || s.stillMobile || '');
-    img.alt = ''; img.decoding = 'async'; img.loading = i < 2 ? 'eager' : 'lazy';
-    bg.appendChild(img);
-    const scrim = mel('div', 'mv2-panel__scrim');
-    const copy = mel('div', 'mv2-panel__copy');
-    let html = '<div class="mv2-panel__num">' + String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0') + '</div>';
-    if (s.eyebrow) html += '<span class="mv2-eyebrow">' + msesc(s.eyebrow) + '</span>';
-    if (s.title) html += (i === 0 ? '<h1 class="mv2-panel__title">' : '<h2 class="mv2-panel__title">') + kinetic(s.title) + (i === 0 ? '</h1>' : '</h2>');
-    if (s.body) html += '<p class="mv2-panel__body">' + msesc(s.body) + '</p>';
-    if (s.tags && s.tags.length) html += '<ul class="mv2-chips">' + s.tags.map(t => '<li>' + msesc(t) + '</li>').join('') + '</ul>';
-    if (s.cta) html += '<div class="mv2-panel__cta">' +
-      (s.cta.primary ? '<a class="mv2-btn mv2-btn--primary" href="' + msesc(s.cta.primary.href || '#') + '">' + msesc(s.cta.primary.label) + '</a>' : '') +
-      (s.cta.secondary ? '<a class="mv2-btn mv2-btn--ghost" href="' + msesc(s.cta.secondary.href || '#') + '">' + msesc(s.cta.secondary.label) + '</a>' : '') + '</div>';
-    if (i === 0) html += '<a class="mv2-scrollcue" href="#' + ids[1] + '"><span>Scroll</span><i></i></a>';
-    copy.innerHTML = html;
-    sec.appendChild(bg); sec.appendChild(scrim); sec.appendChild(copy);
-    container.appendChild(sec);
-    return { sec, bg, img, video: null, clip: 'assets/vid/scene' + (i + 1) + '.mp4', vis: false };
-  });
-
-  let playing = null;
-  function enter(o, i) {
-    o.sec.classList.add('mv2-live', 'mv2-vis'); o.vis = true;
-    dots.forEach((d, k) => d.classList.toggle('on', k === i));
-    if (reduce) return;
-    if (playing && playing !== o && playing.video) { try { playing.video.pause(); playing.video.currentTime = 0; } catch (e) {} }
-    playing = o;
-    if (!o.video) {
-      const v = mel('video', 'mv2-panel__video');
-      v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = false; v.preload = 'auto';
-      v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('preload', 'auto');
-      v.src = o.clip;
-      v.addEventListener('loadeddata', () => o.sec.classList.add('mv2-hasvid'));
-      o.bg.appendChild(v); o.video = v;
-    }
-    try { o.video.currentTime = 0; } catch (e) {}
-    const pr = o.video.play(); if (pr && pr.catch) pr.catch(() => {});
-  }
-  function leave(o) { o.vis = false; o.sec.classList.remove('mv2-vis'); if (o.video) { try { o.video.pause(); o.video.currentTime = 0; } catch (e) {} } }
-
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver(es => es.forEach(e => {
-      const i = panels.findIndex(x => x.sec === e.target); if (i < 0) return;
-      if (e.isIntersecting && e.intersectionRatio >= 0.55) enter(panels[i], i);
-      else if (!e.isIntersecting) leave(panels[i]);
-    }), { threshold: [0, 0.55, 0.9] });
-    panels.forEach(o => io.observe(o.sec));
-  } else {
-    panels.forEach((o, i) => enter(o, i));
-  }
-  enter(panels[0], 0);
-
-  let tick = false;
-  function onScroll() {
-    if (tick) return; tick = true;
-    requestAnimationFrame(() => {
-      const vh = window.innerHeight;
-      panels.forEach(o => {
-        if (!o.vis) return;
-        const r = o.sec.getBoundingClientRect();
-        const prog = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh));
-        o.bg.style.transform = 'translateY(' + (prog * 6).toFixed(2) + '%) scale(1.06)';
-      });
-      tick = false;
-    });
-  }
-  if (!reduce) window.addEventListener('scroll', onScroll, { passive: true });
-}
 
 function copyHTML(s, i, N, px) {
   px = px || 'mv';
@@ -1577,153 +1602,32 @@ function copyHTML(s, i, N, px) {
 
 function msesc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function mel(t, c) { const n = document.createElement(t); if (c) n.className = c; return n; }
-function injectMobileCSS() {
-  if (document.getElementById('mv-css')) return;
-  const st = document.createElement('style'); st.id = 'mv-css';
-  st.textContent = `
-  .mv2-root{position:relative;z-index:1;--mv2-accent:#d17a42;}
-  .mv2-bar{position:fixed;top:0;left:0;right:0;z-index:70;display:flex;align-items:center;justify-content:space-between;
-    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:linear-gradient(180deg,rgba(10,10,12,.66),transparent);}
-  .mv2-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:#f2f6fc;}
-  .mv2-brand__logo{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 3px 10px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.16);}
-  .mv2-brand__name{font-family:var(--font-display,system-ui);font-weight:700;font-size:.98rem;}
-  .mv2-menu-btn{width:42px;height:42px;border:0;background:rgba(255,255,255,.06);border-radius:12px;display:grid;place-items:center;gap:4px;cursor:pointer;}
-  .mv2-menu-btn i{display:block;width:18px;height:2px;background:#f2f6fc;border-radius:2px;transition:transform .3s,opacity .3s;}
-  body.mv2-menu-open .mv2-menu-btn i:nth-child(1){transform:translateY(6px) rotate(45deg);}
-  body.mv2-menu-open .mv2-menu-btn i:nth-child(2){opacity:0;}
-  body.mv2-menu-open .mv2-menu-btn i:nth-child(3){transform:translateY(-6px) rotate(-45deg);}
-  .mv2-menu{position:fixed;inset:0;z-index:69;background:rgba(10,10,12,.97);backdrop-filter:blur(6px);
-    display:flex;flex-direction:column;justify-content:center;gap:2px;padding:0 30px;
-    opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .3s,transform .3s;}
-  body.mv2-menu-open .mv2-menu{opacity:1;pointer-events:auto;transform:none;}
-  .mv2-menu a{font-family:var(--font-display,system-ui);font-weight:700;font-size:1.55rem;color:#f2f6fc;text-decoration:none;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);}
-  .mv2-menu a:last-child{border:0;color:var(--mv2-accent,#d17a42);}
-  .mv2-rail{position:fixed;right:10px;top:50%;transform:translateY(-50%);z-index:65;display:flex;flex-direction:column;gap:9px;pointer-events:none;}
-  .mv2-rail i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.24);transition:all .35s ease;}
-  .mv2-rail i.on{background:var(--mv2-accent);height:20px;border-radius:3px;box-shadow:0 0 12px color-mix(in srgb,var(--mv2-accent) 70%,transparent);}
-  .mv2-eyebrow{display:block;font-family:var(--font-display,system-ui);font-weight:700;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mv2-accent);}
-  .mv2-chips{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px;}
-  .mv2-chips li{font-size:.76rem;font-weight:600;padding:7px 13px;border-radius:999px;color:#eef3f9;
-    background:color-mix(in srgb,var(--mv2-accent) 16%,rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--mv2-accent) 38%,transparent);
-    opacity:0;transform:translateY(10px);transition:opacity .5s ease .25s,transform .5s ease .25s;}
-  .mv2-live .mv2-chips li{opacity:1;transform:none;}
-
-  .mv2-panel{position:relative;min-height:100svh;min-height:100vh;overflow:hidden;display:flex;align-items:flex-end;scroll-snap-align:start;}
-  .mv2-panel__bg{position:absolute;inset:-3% -3%;will-change:transform;transform:scale(1.06);}
-  .mv2-panel__img,.mv2-panel__video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 44%;}
-  .mv2-panel__video{opacity:0;transition:opacity .5s ease;}
-  .mv2-panel.mv2-hasvid .mv2-panel__video{opacity:1;}
-  @media (prefers-reduced-motion:no-preference){
-    .mv2-panel.mv2-live .mv2-panel__img{animation:mv2-kb 14s ease-out both;}
-    .mv2-panel:not(.mv2-vis) .mv2-panel__img{animation-play-state:paused;}
-  }
-  @keyframes mv2-kb{from{transform:scale(1.16)}to{transform:scale(1)}}
-  .mv2-panel__scrim{position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg,rgba(10,10,12,.42) 0%,rgba(10,10,12,0) 24%,rgba(10,10,12,0) 46%,rgba(10,10,12,.66) 72%,rgba(10,10,12,.96) 100%);}
-  .mv2-panel__copy{position:relative;z-index:2;width:100%;padding:0 20px calc(40px + env(safe-area-inset-bottom));}
-  .mv2-panel--hero .mv2-panel__copy{padding-bottom:calc(56px + env(safe-area-inset-bottom));}
-  .mv2-panel__num{font-family:ui-monospace,Menlo,monospace;font-size:.68rem;letter-spacing:.14em;color:#9aa7b8;margin-bottom:8px;
-    opacity:0;transition:opacity .5s ease;} .mv2-live .mv2-panel__num{opacity:1;}
-  .mv2-panel__title{font-family:var(--font-display,system-ui);font-weight:700;color:#f8fbff;margin:10px 0 0;
-    font-size:clamp(2.3rem,10.5vw,3.4rem);line-height:1.02;letter-spacing:-.015em;text-shadow:0 3px 30px rgba(10,10,12,.85);}
-  .mv2-kt__w{display:inline-block;overflow:hidden;vertical-align:top;}
-  .mv2-kt__i{display:inline-block;transform:translateY(112%);transition:transform .7s cubic-bezier(.2,1,.3,1);}
-  .mv2-live .mv2-kt__i{transform:none;}
-  .mv2-kt__w:nth-child(2) .mv2-kt__i{transition-delay:.06s}
-  .mv2-kt__w:nth-child(3) .mv2-kt__i{transition-delay:.12s}
-  .mv2-kt__w:nth-child(4) .mv2-kt__i{transition-delay:.18s}
-  .mv2-kt__w:nth-child(n+5) .mv2-kt__i{transition-delay:.24s}
-  .mv2-panel__body{margin:16px 0 0;font-size:1.05rem;line-height:1.5;color:#d7deea;max-width:32ch;text-shadow:0 1px 12px rgba(10,10,12,.9);
-    opacity:0;transform:translateY(12px);transition:opacity .55s ease .18s,transform .55s ease .18s;}
-  .mv2-live .mv2-panel__body{opacity:1;transform:none;}
-  .mv2-panel__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;opacity:0;transform:translateY(12px);transition:opacity .55s ease .3s,transform .55s ease .3s;}
-  .mv2-live .mv2-panel__cta{opacity:1;transform:none;}
-  .mv2-btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 24px;border-radius:999px;text-decoration:none;font-weight:600;font-size:.98rem;}
-  .mv2-btn--primary{background:var(--mv2-accent);color:#0a0a0c;}
-  .mv2-btn--ghost{color:#f2f6fc;border:1.5px solid rgba(255,255,255,.34);}
-  .mv2-scrollcue{display:inline-flex;align-items:center;gap:10px;margin-top:24px;text-decoration:none;color:#9aa7b8;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;}
-  .mv2-scrollcue i{width:20px;height:32px;border-radius:11px;border:2px solid rgba(255,255,255,.3);position:relative;}
-  .mv2-scrollcue i::after{content:"";position:absolute;left:50%;top:6px;width:3px;height:7px;border-radius:2px;background:var(--mv2-accent);transform:translateX(-50%);animation:mv2-wheel 1.7s ease-in-out infinite;}
-  @keyframes mv2-wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,9px)}}
-  @media (prefers-reduced-motion:reduce){ .mv2-kt__i{transform:none;} .mv2-panel__body,.mv2-panel__cta,.mv2-chips li,.mv2-panel__num{opacity:1;transform:none;} }
-  `;
-  document.head.appendChild(st);
-}
 
 function mountDesktopFlight(container, config) {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const S = config.sections || [];
-  const FRAMES = config.frameCount | 0;
-  const FDIR = config.frameDir || 'assets/frames/';
   const N = S.length;
-  if (!N || !FRAMES) return false;
+  if (!N || !config.video) return false;
   injectDFCSS();
   container.classList.add('df-root');
-  container.style.setProperty('--df-accent', S[0].accent || '#d17a42');
-  const FEXT = config.frameExt || 'jpg';
-  const FIT = config.fit || 'contain';
-  const frameURL = i => FDIR + 'f' + String(i + 1).padStart(4, '0') + '.' + FEXT;
+  container.style.setProperty('--df-accent', S[0].accent || '#3b82f6');
 
   const bg = mel('div', 'df-bg');
-  const poster = mel('img', 'df-poster'); poster.src = frameURL(0); poster.alt = '';
-  const canvas = mel('canvas', 'df-canvas'); const ctx = canvas.getContext('2d', { alpha: false });
-  bg.appendChild(poster); bg.appendChild(canvas); bg.appendChild(mel('div', 'df-veil'));
+  const poster = mel('img', 'df-poster'); poster.src = config.poster || ''; poster.alt = '';
+  const video = mel('video', 'df-video');
+  video.muted = true; video.defaultMuted = true; video.playsInline = true; video.preload = 'auto';
+  video.setAttribute('muted', ''); video.setAttribute('playsinline', ''); video.setAttribute('preload', 'auto');
+  video.src = config.video;
+  bg.appendChild(poster); bg.appendChild(video); bg.appendChild(mel('div', 'df-veil'));
 
-  const imgs = new Array(FRAMES), state = new Uint8Array(FRAMES);
-  let inflight = 0, seq = 0, firstDrawn = false;
-  const MAXP = config.maxParallel || 12;
-  const AHEAD = config.lookAhead || 14;
-  function want(i) {
-    i = Math.max(0, Math.min(FRAMES - 1, i));
-    if (state[i]) return;
-    state[i] = 1; inflight++;
-    const im = new Image(); im.decoding = 'async';
-    const done = () => { imgs[i] = im; state[i] = 2; inflight--; if (i === 0 && !firstDrawn) draw(0); pump(); };
-    im.onload = () => { if (im.decode) im.decode().then(done, done); else done(); };
-    im.onerror = () => { state[i] = 0; inflight--; if (i < seq) seq = i; pump(); };
-    im.src = frameURL(i);
-  }
-  function pump() { while (inflight < MAXP && seq < FRAMES) { if (!state[seq]) want(seq); seq++; } }
-  function nearestLoaded(i) {
-    if (state[i] === 2) return i;
-    for (let d = 1; d < FRAMES; d++) {
-      if (i - d >= 0 && state[i - d] === 2) return i - d;
-      if (i + d < FRAMES && state[i + d] === 2) return i + d;
-    }
-    return -1;
-  }
-  let cw = 0, chh = 0, dpr = 1;
-  function sizeCanvas() {
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    cw = window.innerWidth; chh = window.innerHeight;
-    canvas.width = Math.round(cw * dpr); canvas.height = Math.round(chh * dpr);
-    canvas.style.width = cw + 'px'; canvas.style.height = chh + 'px';
-    drawIdx(lastIdx, true);
-  }
-  let lastIdx = -1;
-  function draw(i) { drawIdx(i, false); }
-  function drawIdx(i, force) {
-    if (i < 0) return;
-    const use = nearestLoaded(i);
-    if (use < 0) return;
-    if (!force && use === lastIdx) return;
-    lastIdx = use;
-    const im = imgs[use]; if (!im) return;
-    const cvW = canvas.width, cvH = canvas.height;
-    const ir = im.width / im.height, cr = cvW / cvH;
-    let w, h, x, y;
-    if (FIT === 'contain') {
-      if (ir > cr) { w = cvW; h = w / ir; } else { h = cvH; w = h * ir; }
-      x = (cvW - w) / 2;
-      y = (cvH - h) * 0.42;
-      if (w < cvW - 1 || h < cvH - 1) { ctx.fillStyle = '#0a0a0c'; ctx.fillRect(0, 0, cvW, cvH); }
-    } else {
-      if (ir > cr) { h = cvH; w = h * ir; } else { w = cvW; h = w / ir; }
-      x = (cvW - w) / 2; y = (cvH - h) / 2 - h * 0.06;
-    }
-    ctx.drawImage(im, x, y, w, h);
-    if (!firstDrawn) { firstDrawn = true; bg.classList.add('df-on'); }
-  }
+  let duration = 0;
+  const onReady = () => {
+    duration = video.duration || 0;
+    bg.classList.add('df-on');
+    read();
+  };
+  video.addEventListener('loadedmetadata', onReady, { once: true });
+  video.addEventListener('error', () => { /* poster stays visible as the fallback */ });
 
   const bar = mel('div', 'df-bar');
   const brand = mel('a', 'df-brand'); brand.href = (config.brand && config.brand.href) || '#top';
@@ -1760,16 +1664,11 @@ function mountDesktopFlight(container, config) {
 
   function jumpTo(i) { window.scrollTo({ top: track.offsetTop + (i + 0.5) / N * (track.offsetHeight - window.innerHeight), behavior: reduce ? 'auto' : 'smooth' }); }
 
-  want(0); pump();
-
   function read() {
     const vh = window.innerHeight;
     const h = track.offsetHeight - vh;
     const p = h > 0 ? clamp((window.scrollY - track.offsetTop) / h) : 0;
     tgt = p;
-    const ti = Math.round(p * (FRAMES - 1));
-    const dir = p >= lastP ? 1 : -1; lastP = p;
-    for (let k = -2; k <= AHEAD; k++) want(ti + k * dir);
     const pn = p * N;
     const near = Math.min(N - 1, Math.max(0, Math.round(pn - 0.5)));
     for (let i = 0; i < N; i++) {
@@ -1784,7 +1683,7 @@ function mountDesktopFlight(container, config) {
       dots.forEach((d, k) => d.classList.toggle('is-active', k === near));
       navItems.forEach((d, k) => d.classList.toggle('is-active', k === near));
     }
-    const a0 = S[near].accent || '#d17a42';
+    const a0 = S[near].accent || '#3b82f6';
     const a1 = S[Math.min(N - 1, near + 1)].accent || a0;
     const frac = clamp(pn - near - 0.5);
     container.style.setProperty('--df-accent', lerpColor(a0, a1, smooth(frac)));
@@ -1793,14 +1692,22 @@ function mountDesktopFlight(container, config) {
     bar.style.setProperty('--df-barbg', p > 0.01 ? '.66' : '.32');
     ticking = false;
   }
+  // Title dissolve: the opening title is crisp at rest, then blurs/fades out
+  // over the first ~40% of a section-unit of scroll as the video reveal
+  // takes over — the "scroll-locked video hero" dissolve effect, driven by
+  // the same eased `cur` the video scrub uses so both read as one motion.
   function raf() {
     cur += (tgt - cur) * (config.chase || 0.16);
-    drawIdx(Math.round(clamp(cur) * (FRAMES - 1)), false);
+    if (duration) {
+      const t = clamp(cur) * duration;
+      if (Math.abs(video.currentTime - t) > 0.016) { try { video.currentTime = t; } catch (e) {} }
+    }
+    const introP = smooth(clamp(cur * N / 0.4));
+    if (copies[0]) copies[0].style.filter = 'blur(' + (introP * 10).toFixed(2) + 'px)';
     requestAnimationFrame(raf);
   }
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
-  window.addEventListener('resize', () => { sizeCanvas(); read(); });
-  sizeCanvas();
+  window.addEventListener('resize', read);
   read();
   requestAnimationFrame(raf);
   return true;
@@ -1810,12 +1717,11 @@ function injectDFCSS() {
   if (document.getElementById('df-css')) return;
   const st = document.createElement('style'); st.id = 'df-css';
   st.textContent = `
-  .df-root{position:relative;z-index:1;--df-accent:#d17a42;}
+  .df-root{position:relative;z-index:1;--df-accent:#3b82f6;}
   .df-bg{position:fixed;inset:0;z-index:0;background:#0a0a0c;overflow:hidden;}
-  .df-poster,.df-canvas{position:absolute;inset:0;width:100%;height:100%;}
-  .df-poster{object-fit:cover;object-position:center 44%;}
-  .df-canvas{opacity:0;transition:opacity .4s ease;}
-  .df-on .df-canvas{opacity:1;} .df-on .df-poster{opacity:0;transition:opacity .5s ease;}
+  .df-poster,.df-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 44%;}
+  .df-video{opacity:0;transition:opacity .4s ease;}
+  .df-on .df-video{opacity:1;} .df-on .df-poster{opacity:0;transition:opacity .5s ease;}
   .df-veil{position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(90deg,rgba(10,10,12,.82) 0%,rgba(10,10,12,.45) 32%,rgba(10,10,12,.08) 60%,transparent 100%),
       linear-gradient(180deg,rgba(10,10,12,.5) 0%,transparent 22%,transparent 70%,rgba(10,10,12,.6) 100%);}
@@ -1839,7 +1745,8 @@ function injectDFCSS() {
   .df-copy__num{font-family:ui-monospace,Menlo,monospace;font-size:.74rem;letter-spacing:.12em;color:#93a2b8;}
   .df-copy__eyebrow{display:block;margin-top:16px;font-family:var(--font-display,system-ui);font-weight:700;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--df-accent);}
   .df-copy__title{font-family:var(--font-display,system-ui);font-weight:700;color:#f7fafe;
-    font-size:clamp(2.2rem,4.4vw,3.5rem);line-height:1.03;margin:12px 0 0;letter-spacing:-.01em;text-shadow:0 3px 30px rgba(10,10,12,.9);}
+    font-size:clamp(2.2rem,4.4vw,3.5rem);line-height:1.03;margin:12px 0 0;letter-spacing:-.01em;text-shadow:0 3px 30px rgba(10,10,12,.9);
+    will-change:filter;}
   .df-copy__body{margin-top:18px;font-size:clamp(1rem,1.2vw,1.14rem);line-height:1.55;color:#dbe2ec;max-width:42ch;text-shadow:0 2px 14px rgba(10,10,12,.92);}
   .df-copy__tags{list-style:none;margin:18px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:9px;}
   .df-copy__tags li{font-size:.8rem;font-weight:600;padding:7px 14px;border-radius:999px;color:#eef3f9;
@@ -1885,42 +1792,20 @@ function injectDFCSS() {
 
 function mountScrollWorld(container, config) {
   const isPhone = window.matchMedia('(hover: none) and (pointer: coarse)').matches || window.innerWidth <= 860;
-  if (isPhone && config.frameCountMobile) {
-    container.classList.add('df-root--m');
-    const mcfg = Object.assign({}, config, {
-      frameDir: config.frameDirMobile || 'assets/frames-m/',
-      frameCount: config.frameCountMobile,
-      frameExt: config.frameExtMobile || 'jpg',
-      scrollPer: config.scrollPerMobile || 1.15,
-      maxParallel: config.maxParallelMobile || 24,
-      lookAhead: config.lookAheadMobile || 26,
-      chase: config.chaseMobile || 0.12,
-      fit: config.fitMobile || 'contain'
-    });
-    if (mountDesktopFlight(container, mcfg)) return;
-    container.classList.remove('df-root--m');
-  }
-  if (isPhone) return mountMobileStory(container, config);
-  if (config.frameCount) mountDesktopFlight(container, config);
+  if (isPhone) { container.classList.add('df-root--m'); config = Object.assign({}, config, { scrollPer: config.scrollPerMobile || config.scrollPer }); }
+  mountDesktopFlight(container, config);
 }
 
 /* ✏️ EDIT: this whole object is the flight. brand + cta + the 4 scenes.
-   frameCount / frameCountMobile MUST equal the number of files in
-   assets/frames/ and assets/frames-m/ once generate-scenes.mjs +
-   build-frames.sh have run (currently blocked — see report: fal.ai
-   returned "Exhausted balance", so assets/frames/ does not exist yet
-   and this flight will render nothing until frameCount is set for real). */
+   2026-11-01: hero background swapped from the canvas frame-sequence engine
+   to a single <video> (assets/hero.mp4, built from the same 3 scene clips)
+   scrubbed via currentTime on scroll — object-fit: cover handles desktop
+   and mobile framing from one asset, no separate frame sets needed. */
 mountScrollWorld(document.getElementById('world'), {
   brand: { name: 'OPM Ventures', href: '#top' },
   cta: { label: 'Work With Us', href: '#connect' },
-  frameCount: 0,          // ← set to the actual file count in assets/frames/ after build-frames.sh
-  frameDir: 'assets/frames/',
-  frameExt: 'jpg',
-  maxParallel: 16,
-  lookAhead: 18,
-  frameCountMobile: 0,    // ← set to the actual file count in assets/frames-m/
-  frameDirMobile: 'assets/frames-m/',
-  frameExtMobile: 'webp',
+  video: 'assets/hero.mp4',
+  poster: 'assets/frames/f0001.jpg',
   scrollPerMobile: 1.15,
   hint: 'scroll to step inside',
   scrollPer: 1.5,
@@ -1928,7 +1813,7 @@ mountScrollWorld(document.getElementById('world'), {
   sections: [
     {
       id: 's1', label: 'Command',
-      accent: '#d17a42',
+      accent: '#3b82f6',
       scroll: 1.6, linger: 0.35,
       eyebrow: 'OPM Ventures LLC',
       title: 'AI That Works While You Serve',
@@ -1937,7 +1822,7 @@ mountScrollWorld(document.getElementById('world'), {
     },
     {
       id: 's2', label: 'The Network',
-      accent: '#dc8a52',
+      accent: '#22d3ee',
       eyebrow: 'How it works',
       title: 'Three Agents. One Pipeline.',
       body: 'Recon finds the leads. Comms drafts the outreach. Command routes and dispatches. Each agent specializes so the system compounds instead of bottlenecking.',
@@ -1945,7 +1830,7 @@ mountScrollWorld(document.getElementById('world'), {
     },
     {
       id: 's3', label: 'The Reach',
-      accent: '#e69a66',
+      accent: '#60a5fa',
       eyebrow: 'The result',
       title: 'Leads While You Sleep.',
       body: 'The daily scheduler fires at 8 AM. Recon runs its scan. Comms drafts the messages. Command logs the tasks. By the time you check your phone, the work is done.',
@@ -1953,7 +1838,7 @@ mountScrollWorld(document.getElementById('world'), {
     },
     {
       id: 's4', label: 'The Work',
-      accent: '#3f8f8a',
+      accent: '#818cf8',
       scroll: 1.6, linger: 0.4,
       eyebrow: 'Built for operators',
       title: 'Built for Operators.',
@@ -1993,13 +1878,37 @@ lenis.on('scroll', setNavScrolled);
 window.addEventListener('scroll', setNavScrolled, { passive: true });
 setNavScrolled();
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.querySelectorAll('.sys-card, .rev-card').forEach(card => {
   const inner = card.querySelector('.sys-card-inner, .rev-card-inner');
   if (!inner) return;
   card.addEventListener('pointermove', e => {
     const r = card.getBoundingClientRect();
-    inner.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-    inner.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    const px = (e.clientX - r.left) / r.width;   // 0..1
+    const py = (e.clientY - r.top) / r.height;   // 0..1
+    inner.style.setProperty('--mx', (px * 100) + '%');
+    inner.style.setProperty('--my', (py * 100) + '%');
+    if (card.classList.contains('sys-card') && !prefersReducedMotion) {
+      const tiltMax = 6; // degrees
+      const rotY = (px - 0.5) * tiltMax * 2;
+      const rotX = (0.5 - py) * tiltMax * 2;
+      gsap.to(card, { rotateX: rotX, rotateY: rotY, duration: 0.4, ease: 'power2.out', overwrite: true });
+    }
+  });
+  if (card.classList.contains('sys-card') && !prefersReducedMotion) {
+    card.addEventListener('pointerleave', () => {
+      gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.6, ease: 'power3.out', overwrite: true });
+    });
+  }
+});
+
+// ── LIQUID GLASS: cursor-lit sheen on pill buttons (CSS approximation —
+// #nav itself uses the real WebGL LiquidGlass shader, set up below) ──
+document.querySelectorAll('.btn-primary, .nav-btn, .btn-ghost').forEach(el => {
+  el.addEventListener('pointermove', e => {
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+    el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
   });
 });
 
@@ -2265,6 +2174,54 @@ gsap.to('.ticker-wrap', {
     scrub: true
   }
 });
+</script>
+
+<script type="module">
+// ── LIQUID GLASS — real WebGL glass refraction for the floating nav ──
+// Library: https://github.com/ybouane/liquidglass (MIT). #nav is a direct
+// child of #world/.df-root (see the HTML above) so the shader can see +
+// refract the flight background (.df-bg, also a direct child of #world —
+// now a scrubbed <video> instead of a canvas, same DOM position) behind
+// it — genuine refraction/blur/specular, not a CSS approximation. Skipped
+// on touch/narrow viewports since WebGL glass is unnecessary GPU overhead
+// on phones there. The CSS baseline on #nav (see FLOATING GLASS NAV above)
+// is the fallback in both cases.
+(async () => {
+  const isPhone = window.matchMedia('(hover: none) and (pointer: coarse)').matches || window.innerWidth <= 860;
+  const navEl = document.getElementById('nav');
+  const worldEl = document.getElementById('world');
+  if (isPhone || !navEl || !worldEl || !window.WebGLRenderingContext) return;
+
+  navEl.dataset.config = JSON.stringify({
+    cornerRadius: 30,
+    zRadius: 22,
+    blurAmount: 0.18,
+    refraction: 0.55,
+    chromAberration: 0.04,
+    edgeHighlight: 0.10,
+    specular: 0.18,
+    fresnel: 1.0,
+    opacity: 0.92,
+    saturation: 0.15,
+    brightness: 0.02,
+    shadowOpacity: 0.35,
+    shadowSpread: 16,
+    shadowOffsetY: 3,
+  });
+
+  try {
+    // Self-hosted rather than the jsdelivr CDN — avoids a runtime
+    // dependency on external CDN uptime for a core visual element.
+    const { LiquidGlass } = await import('./assets/vendor/liquidglass.min.js');
+    const instance = await LiquidGlass.init({ root: worldEl, glassElements: [navEl] });
+    navEl.classList.add('lg-active');
+    const markDirty = () => instance.markChanged();
+    window.addEventListener('scroll', markDirty, { passive: true });
+    window.addEventListener('resize', markDirty, { passive: true });
+  } catch (err) {
+    console.warn('[liquid-glass] init failed — nav keeps its CSS fallback.', err);
+  }
+})();
 </script>
 
 </body>
